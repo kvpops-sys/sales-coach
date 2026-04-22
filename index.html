@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Humand · Sales Coach Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #4f7cff;
+    --accent2: #ff6b6b;
+    --accent3: #ffd166;
+    --accent4: #06d6a0;
+    --text: #e8eaf0;
+    --text2: #8b92a8;
+    --red: #ff4757;
+    --yellow: #ffd166;
+    --green: #06d6a0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+  }
+
+  .logo-dot {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+
+  .header-filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  select, .filter-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  select:hover, .filter-btn:hover { border-color: var(--accent); }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 32px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 10px 20px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    border-bottom: none;
+    position: relative;
+    bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--accent);
+    border-bottom-color: var(--surface);
+  }
+
+  /* MAIN */
+  .main { padding: 28px 32px; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* GRID */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .kpi-value {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+
+  .kpi-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+
+  .badge-red { background: rgba(255,71,87,0.15); color: var(--red); }
+  .badge-green { background: rgba(6,214,160,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(255,209,102,0.15); color: var(--yellow); }
+
+  /* AE TABLE */
+  .ae-table { width: 100%; border-collapse: collapse; }
+  .ae-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ae-table th.sortable { cursor: pointer; user-select: none; }
+  .ae-table th.sortable:hover { color: var(--text); }
+
+  .ae-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .ae-table tr:last-child td { border-bottom: none; }
+  .ae-table tr:hover td { background: var(--surface2); }
+
+  .ae-name { font-weight: 500; }
+
+  .score-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .score-high { background: rgba(6,214,160,0.15); color: var(--green); }
+  .score-mid { background: rgba(255,209,102,0.15); color: var(--yellow); }
+  .score-low { background: rgba(255,71,87,0.15); color: var(--red); }
+
+  /* SEMAPHORE */
+  .semaphore {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .sem-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .sem-yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  .sem-red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  /* CHART WRAPPER */
+  .chart-wrap { position: relative; height: 240px; }
+  .chart-wrap-lg { position: relative; height: 320px; }
+  .chart-wrap-sm { position: relative; height: 180px; }
+
+  /* CATEGORY BARS */
+  .cat-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .cat-bar-label {
+    font-size: 12px;
+    color: var(--text2);
+    width: 180px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cat-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .cat-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+  }
+
+  .cat-bar-count {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text2);
+    width: 30px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* DIAGNOSIS LIST */
+  .diag-item {
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text2);
+    border-left: 3px solid var(--accent);
+    line-height: 1.5;
+  }
+
+  .diag-meta {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  /* RADAR CHART */
+  .radar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+
+  .radar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .radar-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title span {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text2);
+  }
+
+  /* FILTER ROW */
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+
+  input[type="date"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+  }
+
+  /* COMPETITOR TAG */
+  .comp-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    margin: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .comp-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* SCROLL */
+  .scroll-table { overflow-x: auto; }
+
+  /* MINI SCORE GRID */
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .score-cell {
+    text-align: center;
+    padding: 6px 2px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 600;
+  }
+
+  .verdict-strong { color: var(--green); font-size: 11px; }
+  .verdict-good { color: var(--yellow); font-size: 11px; }
+  .verdict-needs { color: var(--red); font-size: 11px; }
+
+  /* EMPTY STATE */
+  .empty { color: var(--text2); font-size: 13px; padding: 20px; text-align: center; }
+
+  /* ALERT BOX */
+  .alert-box {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .alert-red { background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.2); }
+  .alert-yellow { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.2); }
+
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-content { flex: 1; }
+  .alert-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .alert-sub { font-size: 12px; color: var(--text2); }
+
+  @media (max-width: 1100px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2-1 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+
+<div id="loader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0d1117;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+  <div style="font-size:32px;">📊</div>
+  <div style="color:#e6edf3;font-size:18px;font-weight:600;">Cargando datos en tiempo real...</div>
+  <div style="color:#8b92a8;font-size:13px;" id="loader-sub">Conectando con Google Sheets</div>
+  <div style="width:200px;height:4px;background:#252a3a;border-radius:2px;overflow:hidden;margin-top:10px;">
+    <div id="loader-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f7cff,#06d6a0);border-radius:2px;transition:width 0.4s ease;"></div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-dot">H</div>
+    Sales Coach · Intelligence
+  </div>
+  <div class="header-filters">
+    <span class="filter-label">Período:</span>
+    <button class="filter-btn active" onclick="setPeriod(30, this)">30 días</button>
+    <button class="filter-btn" onclick="setPeriod(60, this)">60 días</button>
+    <button class="filter-btn" onclick="setPeriod(0, this)">Todo</button>
+    <select id="aeFilter" onchange="applyFilters()">
+      <option value="">Todos los AEs</option>
+    </select>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview')">📊 Overview</div>
+  <div class="tab" onclick="showTab('team')">👥 Equipo</div>
+  <div class="tab" onclick="showTab('areas')">🎯 Áreas de Mejora</div>
+  <div class="tab" onclick="showTab('calls')">📞 Calls</div>
+  <div class="tab" onclick="showTab('hubspot')">💰 Score vs Results</div>
+  <div class="tab" onclick="showTab('convo')">🎙️ Conversación</div>
+</div>
+
+<div class="main">
+
+  <!-- TAB: OVERVIEW -->
+  <div id="tab-overview" class="tab-content active">
+
+    <div class="grid-4">
+      <div class="card">
+        <div class="card-title">Calls Analizadas</div>
+        <div class="kpi-value" id="kpi-calls">—</div>
+        <div class="kpi-sub" id="kpi-calls-sub">en el período</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Score Promedio Equipo</div>
+        <div class="kpi-value" id="kpi-avg">—</div>
+        <div class="kpi-sub">sobre 10</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Buying Intent Alto</div>
+        <div class="kpi-value" id="kpi-high">—</div>
+        <div class="kpi-sub" id="kpi-high-pct">del total</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Strong Calls</div>
+        <div class="kpi-value" id="kpi-strong">—</div>
+        <div class="kpi-sub" id="kpi-strong-pct">del total</div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div id="alerts-section" style="margin-bottom:24px;"></div>
+
+    <div class="grid-2-1">
+      <div class="card">
+        <div class="card-title">Top Áreas de Mejora del Equipo</div>
+        <div id="cat-bars"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Compradores por Intención</div>
+        <div class="chart-wrap-sm">
+          <canvas id="intentChart"></canvas>
+        </div>
+        <div style="margin-top:16px;">
+          <div class="card-title">Veredictos</div>
+          <div id="verdict-bars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Evolución Semanal — Score Promedio Equipo</div>
+        <div class="chart-wrap">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Semáforo de AEs</div>
+        <div id="semaphore-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: EQUIPO -->
+  <div id="tab-team" class="tab-content">
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Radar de Equipo — Promedio por Dimensión</div>
+        <div class="chart-wrap">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Score por AE — Detalle por Dimensión</div>
+        <div class="filter-row">
+          <select id="aeRadarSelect" onchange="updateAERadar()">
+            <option value="">Seleccionar AE...</option>
+          </select>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="aeRadarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div class="card-title">Ranking de AEs</div>
+      <div class="scroll-table">
+        <table class="ae-table" id="aeRankingTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>AE</th>
+              <th class="sortable" onclick="sortTable('avg')">Promedio ↕</th>
+              <th>Discovery</th>
+              <th>Business Impact</th>
+              <th>Product</th>
+              <th>Objeciones</th>
+              <th>Rapport</th>
+              <th>Next Steps</th>
+              <th>Closing</th>
+              <th>Calls</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="aeRankingBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Evolución Temporal por AE</div>
+      <div class="filter-row">
+        <select id="aeTrendSelect" onchange="updateAETrend()" multiple size="4" style="min-width:200px; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:4px; border-radius:8px; font-family:inherit; font-size:12px;">
+        </select>
+        <span class="filter-label" style="font-size:11px;">(Ctrl+click para múltiples)</span>
+      </div>
+      <div class="chart-wrap-lg">
+        <canvas id="aeTrendChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: ÁREAS DE MEJORA -->
+  <div id="tab-areas" class="tab-content">
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Frecuencia por Categoría</div>
+        <div class="chart-wrap">
+          <canvas id="catChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Diagnósticos por AE y Categoría</div>
+        <div class="chart-wrap">
+          <canvas id="aeHeatChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div class="card-title">Explorador de Diagnósticos</div>
+      <div class="filter-row">
+        <select id="catFilter" onchange="filterDiagnoses()">
+          <option value="">Todas las categorías</option>
+        </select>
+        <select id="aeDiagFilter" onchange="filterDiagnoses()">
+          <option value="">Todos los AEs</option>
+        </select>
+        <input type="date" id="diagFrom" onchange="filterDiagnoses()" />
+        <input type="date" id="diagTo" onchange="filterDiagnoses()" />
+        <span id="diag-count" class="filter-label"></span>
+      </div>
+      <div id="diag-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Competidores Mencionados</div>
+      <div id="comp-list"></div>
+    </div>
+
+  </div>
+
+  <!-- TAB: CALLS -->
+  <div id="tab-calls" class="tab-content">
+    <div class="card">
+      <div class="card-title">Historial de Calls</div>
+      <div class="filter-row">
+        <select id="callsAEFilter" onchange="filterCalls()">
+          <option value="">Todos los AEs</option>
+        </select>
+        <select id="callsIntentFilter" onchange="filterCalls()">
+          <option value="">Todas las intenciones</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <select id="callsVerdictFilter" onchange="filterCalls()">
+          <option value="">Todos los veredictos</option>
+          <option value="Strong call">Strong call</option>
+          <option value="Good call with improvements">Good call with improvements</option>
+          <option value="Needs improvement">Needs improvement</option>
+        </select>
+      </div>
+      <div class="scroll-table">
+        <table class="ae-table" id="callsTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>AE</th>
+              <th>Meeting</th>
+              <th>Promedio</th>
+              <th>Discovery</th>
+              <th>B.Impact</th>
+              <th>Product</th>
+              <th>Objeciones</th>
+              <th>Rapport</th>
+              <th>Next Steps</th>
+              <th>Closing</th>
+              <th>Intent</th>
+              <th>Competidores</th>
+              <th>Veredicto</th>
+            </tr>
+          </thead>
+          <tbody id="callsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- TAB: SCORE VS RESULTS -->
+  <div id="tab-hubspot" class="tab-content">
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card"><div class="card-title">Highest Win Rate</div><div class="kpi-value" id="hs-top-wr" style="font-size:28px;color:var(--green)">--</div><div class="kpi-sub" id="hs-top-wr-sub"></div></div>
+      <div class="card"><div class="card-title">Best Score + Win Rate</div><div class="kpi-value" id="hs-top-combo" style="font-size:20px;line-height:1.2">--</div><div class="kpi-sub" id="hs-top-combo-sub"></div></div>
+      <div class="card"><div class="card-title">At Risk AEs</div><div class="kpi-value" id="hs-risk" style="font-size:34px;color:var(--red)">--</div><div class="kpi-sub" id="hs-risk-sub">Low score + Low win rate</div></div>
+      <div class="card"><div class="card-title">Team Avg Win Rate</div><div class="kpi-value" id="hs-avg-wr" style="font-size:34px;">--</div><div class="kpi-sub">across all AEs</div></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">Coaching Score vs Win Rate</div>
+        <div class="chart-wrap-lg"><canvas id="corrChart"></canvas></div>
+        <div style="font-size:10px;color:var(--text2);margin-top:8px;">
+          <span style="color:#06d6a0">&#9679;</span> High score + High WR &nbsp;
+          <span style="color:#ffd166">&#9679;</span> Mixed &nbsp;
+          <span style="color:#ff4757">&#9679;</span> Needs attention
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Win Rate by AE</div>
+        <div class="chart-wrap-lg"><canvas id="wrChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Full AE Table — Coaching Score x Commercial Results</div>
+      <div class="scroll-table">
+        <table class="ae-table">
+          <thead><tr>
+            <th>AE</th><th>Avg Score</th><th>Calls</th>
+            <th>Won</th><th>Lost</th><th>Active</th><th>Win Rate</th>
+            <th>Closing</th><th>Objections</th><th>Status</th>
+          </tr></thead>
+          <tbody id="hsCorrBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- TAB: CONVERSACION -->
+  <div id="tab-convo" class="tab-content">
+    <div style="background:rgba(79,124,255,0.08);border:1px solid rgba(79,124,255,0.25);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--text2);">
+      ⚡ Estas métricas se capturan automáticamente desde el transcript de Fathom via Zapier. Las calls anteriores no tienen datos aún — aparecerán a medida que el sistema procese nuevas grabaciones.
+    </div>
+    <div class="grid-4" style="margin-bottom:20px;">
+      <div class="card"><div class="card-title">% Habla AE Promedio</div><div class="kpi-value" id="cv-ae-talk" style="font-size:34px;">--</div><div class="kpi-sub">ideal: 40-50%</div></div>
+      <div class="card"><div class="card-title">Preguntas AE Promedio</div><div class="kpi-value" id="cv-ae-q" style="font-size:34px;">--</div><div class="kpi-sub">por call</div></div>
+      <div class="card"><div class="card-title">Monólogos AE Promedio</div><div class="kpi-value" id="cv-monologs" style="font-size:34px;color:var(--red)">--</div><div class="kpi-sub">bloques &gt;100 palabras</div></div>
+      <div class="card"><div class="card-title">Calls con datos</div><div class="kpi-value" id="cv-count" style="font-size:34px;">--</div><div class="kpi-sub">de 241 analizadas</div></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">% Habla AE por AE</div>
+        <div class="chart-wrap-lg"><canvas id="cvTalkChart"></canvas></div>
+        <div style="font-size:10px;color:var(--text2);margin-top:6px;">Zona ideal: 40–50% — si el AE habla más del 60% la call es un monólogo</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Monólogos por AE</div>
+        <div class="chart-wrap-lg"><canvas id="cvMonoChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Detalle por Call — Métricas de Conversación</div>
+      <div class="filter-row">
+        <select id="cv-ae-filter" onchange="filterCvTable()"><option value="">Todos los AEs</option></select>
+        <span id="cv-count-label" class="filter-label"></span>
+      </div>
+      <div class="scroll-table">
+        <table class="ae-table">
+          <thead><tr>
+            <th>Fecha</th><th>AE</th><th>Call</th>
+            <th>% Habla AE</th><th>% Habla Cliente</th>
+            <th>Preguntas AE</th><th>Preguntas Cliente</th>
+            <th>Monólogos AE</th><th>Avg Score</th>
+          </tr></thead>
+          <tbody id="cvTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+let RAW_SCORES = [];
+
+let RAW_DIAG = [];
+
+let AE_SUMMARY = [];
+
+// ============================================================
+// STATE
+// ============================================================
+let periodDays = 30;
+let selectedAE = '';
+let charts = {};
+
+// ============================================================
+// UTILS
+// ============================================================
+function getDateLimit() {
+  if (periodDays === 0) return new Date('2000-01-01');
+  const d = new Date();
+  d.setDate(d.getDate() - periodDays);
+  return d;
+}
+
+function filterByPeriodAndAE(arr) {
+  const limit = getDateLimit();
+  return arr.filter(r => {
+    const d = new Date(r.date);
+    const dateOk = d >= limit;
+    const aeOk = !selectedAE || r.ae === selectedAE;
+    return dateOk && aeOk;
+  });
+}
+
+function avg(arr) {
+  if (!arr.length) return 0;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function scoreClass(v) {
+  if (v >= 8) return 'score-high';
+  if (v >= 7) return 'score-mid';
+  return 'score-low';
+}
+
+function semColor(v) {
+  if (v >= 7.8) return 'sem-green';
+  if (v >= 7) return 'sem-yellow';
+  return 'sem-red';
+}
+
+function fmt(n) { return n.toFixed(1); }
+
+const CAT_COLORS = {
+  'Business Impact': '#4f7cff',
+  'Objection Handling': '#ff6b6b',
+  'Discovery': '#06d6a0',
+  'Confidence & Filler Words': '#ffd166',
+  'Follow-up & Next Steps': '#a29bfe',
+  'Storytelling & Case Studies': '#fd79a8',
+  'Closing & Urgency': '#e17055',
+  'ROI & Metrics': '#74b9ff',
+  'Rapport & Communication': '#55efc4',
+  'Time Management': '#b2bec3',
+  'Competitive Positioning': '#fdcb6e',
+  'Other': '#636e72',
+};
+
+// ============================================================
+// POPULATE SELECTS
+// ============================================================
+function populateSelects() {
+  const aes = [...new Set(RAW_SCORES.map(s => s.ae).filter(Boolean))].sort();
+
+  ['aeFilter', 'aeRadarSelect', 'aeDiagFilter', 'callsAEFilter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    aes.forEach(ae => {
+      const opt = document.createElement('option');
+      opt.value = ae; opt.textContent = ae;
+      el.appendChild(opt);
+    });
+  });
+
+  const aeTrendEl = document.getElementById('aeTrendSelect');
+  if (aeTrendEl) {
+    aes.forEach(ae => {
+      const opt = document.createElement('option');
+      opt.value = ae; opt.textContent = ae;
+      aeTrendEl.appendChild(opt);
+    });
+  }
+
+  const cats = [...new Set(RAW_DIAG.map(d => d.category).filter(Boolean))].sort();
+  const catEl = document.getElementById('catFilter');
+  cats.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    catEl.appendChild(opt);
+  });
+}
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  renderAll();
+}
+
+// ============================================================
+// FILTER CONTROLS
+// ============================================================
+function setPeriod(days, btn) {
+  periodDays = days;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  selectedAE = document.getElementById('aeFilter').value;
+  renderAll();
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  renderOverview();
+  renderTeam();
+  renderAreas();
+  renderCalls();
+  renderHubspot();
+  renderConvo();
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+function renderOverview() {
+  const scores = filterByPeriodAndAE(RAW_SCORES);
+  const diags = filterByPeriodAndAE(RAW_DIAG);
+
+  // KPIs
+  document.getElementById('kpi-calls').textContent = scores.length;
+  document.getElementById('kpi-calls-sub').textContent = periodDays ? `últimos ${periodDays} días` : 'histórico';
+
+  const allAvgs = scores.map(s => (s.discovery + s.business_impact + s.product + s.objections + s.rapport + s.next_steps + s.closing) / 7);
+  document.getElementById('kpi-avg').textContent = allAvgs.length ? fmt(avg(allAvgs)) : '—';
+
+  const highIntent = scores.filter(s => s.buying_intent === 'High').length;
+  document.getElementById('kpi-high').textContent = highIntent;
+  document.getElementById('kpi-high-pct').textContent = scores.length ? `${Math.round(highIntent/scores.length*100)}% del total` : '';
+
+  const strong = scores.filter(s => s.verdict === 'Strong call').length;
+  document.getElementById('kpi-strong').textContent = strong;
+  document.getElementById('kpi-strong-pct').textContent = scores.length ? `${Math.round(strong/scores.length*100)}% del total` : '';
+
+  // Alerts
+  const alertsEl = document.getElementById('alerts-section');
+  const aeAvgs = {};
+  scores.forEach(s => {
+    if (!aeAvgs[s.ae]) aeAvgs[s.ae] = [];
+    aeAvgs[s.ae].push((s.discovery + s.business_impact + s.product + s.objections + s.rapport + s.next_steps + s.closing) / 7);
+  });
+  let alertsHTML = '';
+  Object.entries(aeAvgs).forEach(([ae, vals]) => {
+    const a = avg(vals);
+    if (a < 6.5) {
+      alertsHTML += `<div class="alert-box alert-red"><div class="alert-icon">🚨</div><div class="alert-content"><div class="alert-title">${ae} necesita atención</div><div class="alert-sub">Promedio ${fmt(a)}/10 en ${vals.length} calls — por debajo del umbral mínimo</div></div></div>`;
+    } else if (a < 7.2) {
+      alertsHTML += `<div class="alert-box alert-yellow"><div class="alert-icon">⚠️</div><div class="alert-content"><div class="alert-title">${ae} en zona de alerta</div><div class="alert-sub">Promedio ${fmt(a)}/10 en ${vals.length} calls — requiere seguimiento</div></div></div>`;
+    }
+  });
+  alertsEl.innerHTML = alertsHTML;
+
+  // Category bars
+  const catCounts = {};
+  diags.forEach(d => {
+    if (d.category && d.category !== 'Other') catCounts[d.category] = (catCounts[d.category] || 0) + 1;
+  });
+  const sorted = Object.entries(catCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxVal = sorted[0]?.[1] || 1;
+  const barsEl = document.getElementById('cat-bars');
+  barsEl.innerHTML = sorted.map(([cat, count]) => `
+    <div class="cat-bar-row">
+      <div class="cat-bar-label" title="${cat}">${cat}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${count/maxVal*100}%;background:${CAT_COLORS[cat]||'#4f7cff'}"></div></div>
+      <div class="cat-bar-count">${count}</div>
+    </div>`).join('');
+
+  // Intent chart
+  const intentCounts = {High: 0, Medium: 0, Low: 0};
+  scores.forEach(s => { if (s.buying_intent) intentCounts[s.buying_intent]++; });
+  destroyChart('intentChart');
+  const ctx = document.getElementById('intentChart').getContext('2d');
+  charts['intentChart'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['High', 'Medium', 'Low'],
+      datasets: [{
+        data: [intentCounts.High, intentCounts.Medium, intentCounts.Low],
+        backgroundColor: ['#06d6a0', '#ffd166', '#ff4757'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { color: '#8b92a8', font: { size: 11 }, boxWidth: 12 } } }
+    }
+  });
+
+  // Verdict bars
+  const verdictCounts = {};
+  scores.forEach(s => { if (s.verdict) verdictCounts[s.verdict] = (verdictCounts[s.verdict] || 0) + 1; });
+  const vEl = document.getElementById('verdict-bars');
+  const vMax = Math.max(...Object.values(verdictCounts), 1);
+  const vColors = {'Strong call': '#06d6a0', 'Good call with improvements': '#ffd166', 'Needs improvement': '#ff4757'};
+  vEl.innerHTML = Object.entries(verdictCounts).map(([v, c]) => `
+    <div class="cat-bar-row">
+      <div class="cat-bar-label" style="font-size:11px;" title="${v}">${v.replace('Good call with improvements','Good w/ improvements')}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${c/vMax*100}%;background:${vColors[v]||'#4f7cff'}"></div></div>
+      <div class="cat-bar-count">${c}</div>
+    </div>`).join('');
+
+  // Trend chart
+  const weeklyAvgs = {};
+  scores.forEach(s => {
+    const d = new Date(s.date);
+    const mon = new Date(d); mon.setDate(d.getDate() - d.getDay() + 1);
+    const key = mon.toISOString().slice(0,10);
+    if (!weeklyAvgs[key]) weeklyAvgs[key] = [];
+    weeklyAvgs[key].push((s.discovery + s.business_impact + s.product + s.objections + s.rapport + s.next_steps + s.closing) / 7);
+  });
+  const weeks = Object.keys(weeklyAvgs).sort();
+  destroyChart('trendChart');
+  const tc = document.getElementById('trendChart').getContext('2d');
+  charts['trendChart'] = new Chart(tc, {
+    type: 'line',
+    data: {
+      labels: weeks.map(w => w.slice(5)),
+      datasets: [{
+        label: 'Score Promedio',
+        data: weeks.map(w => avg(weeklyAvgs[w])),
+        borderColor: '#4f7cff',
+        backgroundColor: 'rgba(79,124,255,0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#4f7cff',
+      }]
+    },
+    options: chartOptions('Score Promedio Equipo')
+  });
+
+  // Semaphore
+  const semEl = document.getElementById('semaphore-list');
+  const aeList = Object.entries(aeAvgs).map(([ae, vals]) => ({ ae, avg: avg(vals), calls: vals.length })).sort((a, b) => b.avg - a.avg);
+  semEl.innerHTML = aeList.map(({ae, avg: a, calls}) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;">
+        <span class="semaphore ${semColor(a)}"></span>
+        <span style="font-size:13px;">${ae}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:11px;color:var(--text2)">${calls} calls</span>
+        <span class="score-pill ${scoreClass(a)}">${fmt(a)}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// TEAM
+// ============================================================
+function renderTeam() {
+  const scores = filterByPeriodAndAE(RAW_SCORES);
+
+  // Team radar
+  const dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+  const dimLabels = ['Discovery','B.Impact','Product','Objeciones','Rapport','Next Steps','Closing'];
+  const teamAvgs = dims.map(d => avg(scores.map(s => s[d]).filter(Boolean)));
+
+  destroyChart('radarChart');
+  const rc = document.getElementById('radarChart').getContext('2d');
+  charts['radarChart'] = new Chart(rc, {
+    type: 'radar',
+    data: {
+      labels: dimLabels,
+      datasets: [{
+        label: 'Equipo',
+        data: teamAvgs,
+        borderColor: '#4f7cff',
+        backgroundColor: 'rgba(79,124,255,0.15)',
+        pointBackgroundColor: '#4f7cff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 10, ticks: { stepSize: 2, color: '#8b92a8', font: {size:10} }, grid: { color: '#252a3a' }, pointLabels: { color: '#8b92a8', font: {size:11} } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // AE table
+  const aeData = {};
+  scores.forEach(s => {
+    if (!aeData[s.ae]) aeData[s.ae] = { counts: 0, sums: {discovery:0, business_impact:0, product:0, objections:0, rapport:0, next_steps:0, closing:0} };
+    aeData[s.ae].counts++;
+    dims.forEach(d => aeData[s.ae].sums[d] += s[d] || 0);
+  });
+
+  const rows = Object.entries(aeData).map(([ae, data]) => {
+    const n = data.counts;
+    const avgs = {};
+    dims.forEach(d => avgs[d] = data.sums[d] / n);
+    avgs.avg = avg(Object.values(avgs));
+    return { ae, n, ...avgs };
+  }).sort((a, b) => b.avg - a.avg);
+
+  const tbody = document.getElementById('aeRankingBody');
+  tbody.innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="color:var(--text2);font-family:'DM Mono',monospace;">${i+1}</td>
+      <td class="ae-name">${r.ae}</td>
+      <td><span class="score-pill ${scoreClass(r.avg)}">${fmt(r.avg)}</span></td>
+      ${dims.map(d => `<td><span class="score-pill ${scoreClass(r[d])}">${fmt(r[d])}</span></td>`).join('')}
+      <td style="color:var(--text2);">${r.n}</td>
+      <td><span class="semaphore ${semColor(r.avg)}"></span></td>
+    </tr>`).join('');
+
+  // AE trend
+  updateAETrend();
+}
+
+function updateAERadar() {
+  const ae = document.getElementById('aeRadarSelect').value;
+  if (!ae) return;
+  const scores = filterByPeriodAndAE(RAW_SCORES).filter(s => s.ae === ae);
+  const dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+  const dimLabels = ['Discovery','B.Impact','Product','Objeciones','Rapport','Next Steps','Closing'];
+  const aeAvgs = dims.map(d => avg(scores.map(s => s[d]).filter(Boolean)));
+
+  destroyChart('aeRadarChart');
+  const rc = document.getElementById('aeRadarChart').getContext('2d');
+  charts['aeRadarChart'] = new Chart(rc, {
+    type: 'radar',
+    data: {
+      labels: dimLabels,
+      datasets: [{
+        label: ae,
+        data: aeAvgs,
+        borderColor: '#06d6a0',
+        backgroundColor: 'rgba(6,214,160,0.15)',
+        pointBackgroundColor: '#06d6a0',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 10, ticks: { stepSize: 2, color: '#8b92a8', font: {size:10} }, grid: { color: '#252a3a' }, pointLabels: { color: '#8b92a8', font: {size:11} } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function updateAETrend() {
+  const el = document.getElementById('aeTrendSelect');
+  const selected = [...el.selectedOptions].map(o => o.value);
+  const aeList = selected.length ? selected : [...new Set(RAW_SCORES.map(s => s.ae))].slice(0, 5);
+
+  const scores = filterByPeriodAndAE(RAW_SCORES);
+  const palette = ['#4f7cff','#06d6a0','#ffd166','#ff6b6b','#a29bfe','#fd79a8','#74b9ff','#e17055'];
+
+  const datasets = aeList.map((ae, i) => {
+    const aeScores = scores.filter(s => s.ae === ae);
+    const weeklyAvgs = {};
+    aeScores.forEach(s => {
+      const d = new Date(s.date);
+      const mon = new Date(d); mon.setDate(d.getDate() - d.getDay() + 1);
+      const key = mon.toISOString().slice(0,10);
+      if (!weeklyAvgs[key]) weeklyAvgs[key] = [];
+      weeklyAvgs[key].push((s.discovery + s.business_impact + s.product + s.objections + s.rapport + s.next_steps + s.closing) / 7);
+    });
+    const weeks = Object.keys(weeklyAvgs).sort();
+    return { ae, weeks, data: weeks.map(w => ({ x: w.slice(5), y: avg(weeklyAvgs[w]) })), color: palette[i % palette.length] };
+  });
+
+  const allWeeks = [...new Set(datasets.flatMap(d => d.data.map(p => p.x)))].sort();
+
+  destroyChart('aeTrendChart');
+  const tc = document.getElementById('aeTrendChart').getContext('2d');
+  charts['aeTrendChart'] = new Chart(tc, {
+    type: 'line',
+    data: {
+      labels: allWeeks,
+      datasets: datasets.map(d => ({
+        label: d.ae,
+        data: allWeeks.map(w => {
+          const p = d.data.find(p => p.x === w);
+          return p ? p.y : null;
+        }),
+        borderColor: d.color,
+        backgroundColor: 'transparent',
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: d.color,
+        spanGaps: true,
+      }))
+    },
+    options: chartOptions('Evolución por AE')
+  });
+}
+
+// ============================================================
+// AREAS
+// ============================================================
+function renderAreas() {
+  const diags = filterByPeriodAndAE(RAW_DIAG);
+
+  // Cat chart
+  const catCounts = {};
+  diags.forEach(d => { if (d.category) catCounts[d.category] = (catCounts[d.category] || 0) + 1; });
+  const sorted = Object.entries(catCounts).sort((a,b) => b[1]-a[1]);
+
+  destroyChart('catChart');
+  const cc = document.getElementById('catChart').getContext('2d');
+  charts['catChart'] = new Chart(cc, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([c]) => c),
+      datasets: [{
+        data: sorted.map(([,v]) => v),
+        backgroundColor: sorted.map(([c]) => CAT_COLORS[c] || '#4f7cff'),
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      ...chartOptions(),
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+    }
+  });
+
+  // AE heat chart
+  const aes = [...new Set(diags.map(d => d.ae))].sort();
+  const cats = Object.keys(catCounts).slice(0, 6);
+  const aeHeatData = aes.map(ae => cats.map(cat => diags.filter(d => d.ae === ae && d.category === cat).length));
+
+  destroyChart('aeHeatChart');
+  const hc = document.getElementById('aeHeatChart').getContext('2d');
+  charts['aeHeatChart'] = new Chart(hc, {
+    type: 'bar',
+    data: {
+      labels: aes.map(a => a.split(' ')[0]),
+      datasets: cats.map((cat, i) => ({
+        label: cat,
+        data: aeHeatData.map(row => row[i]),
+        backgroundColor: CAT_COLORS[cat] || '#4f7cff',
+        borderRadius: 3,
+      }))
+    },
+    options: {
+      ...chartOptions(),
+      scales: {
+        x: { stacked: true, ticks: { color: '#8b92a8', font: {size: 10} }, grid: { color: '#252a3a' } },
+        y: { stacked: true, ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } }
+      },
+      plugins: { legend: { position: 'bottom', labels: { color: '#8b92a8', font: {size: 10}, boxWidth: 10 } } }
+    }
+  });
+
+  // Competitors
+  const compCounts = {};
+  filterByPeriodAndAE(RAW_SCORES).forEach(s => {
+    if (s.competitors && s.competitors !== 'None') {
+      s.competitors.split(',').forEach(c => {
+        c = c.trim();
+        if (c && c !== 'None') compCounts[c] = (compCounts[c] || 0) + 1;
+      });
+    }
+  });
+  const compEl = document.getElementById('comp-list');
+  const compSorted = Object.entries(compCounts).sort((a,b) => b[1]-a[1]);
+  compEl.innerHTML = compSorted.length
+    ? compSorted.map(([c, n]) => `<span class="comp-tag">${c} <span style="color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;">${n}</span></span>`).join('')
+    : '<div class="empty">No hay competidores registrados en este período</div>';
+
+  filterDiagnoses();
+}
+
+function filterDiagnoses() {
+  const cat = document.getElementById('catFilter').value;
+  const ae = document.getElementById('aeDiagFilter').value;
+  const from = document.getElementById('diagFrom').value;
+  const to = document.getElementById('diagTo').value;
+
+  let filtered = filterByPeriodAndAE(RAW_DIAG);
+  if (cat) filtered = filtered.filter(d => d.category === cat);
+  if (ae) filtered = filtered.filter(d => d.ae === ae);
+  if (from) filtered = filtered.filter(d => d.date >= from);
+  if (to) filtered = filtered.filter(d => d.date <= to);
+
+  document.getElementById('diag-count').textContent = `${filtered.length} diagnósticos`;
+
+  const el = document.getElementById('diag-list');
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No hay diagnósticos para este filtro</div>'; return; }
+
+  el.innerHTML = filtered.slice(0, 50).map(d => `
+    <div class="diag-item">
+      <div class="diag-meta">${d.ae} · ${d.meeting} · ${d.date}</div>
+      <span style="display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${CAT_COLORS[d.category]||'#4f7cff'}22;color:${CAT_COLORS[d.category]||'#4f7cff'};margin-bottom:4px;">${d.category}</span>
+      ${d.diagnosis}
+    </div>`).join('');
+
+  if (filtered.length > 50) {
+    el.innerHTML += `<div class="empty">... y ${filtered.length - 50} más</div>`;
+  }
+}
+
+// ============================================================
+// CALLS
+// ============================================================
+function renderCalls() {
+  filterCalls();
+}
+
+function filterCalls() {
+  const ae = document.getElementById('callsAEFilter').value;
+  const intent = document.getElementById('callsIntentFilter').value;
+  const verdict = document.getElementById('callsVerdictFilter').value;
+
+  let filtered = filterByPeriodAndAE(RAW_SCORES);
+  if (ae) filtered = filtered.filter(s => s.ae === ae);
+  if (intent) filtered = filtered.filter(s => s.buying_intent === intent);
+  if (verdict) filtered = filtered.filter(s => s.verdict === verdict);
+
+  const tbody = document.getElementById('callsBody');
+  const dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+
+  tbody.innerHTML = filtered.sort((a,b) => b.date.localeCompare(a.date)).map(s => {
+    const a = avg(dims.map(d => s[d]));
+    const vClass = s.verdict === 'Strong call' ? 'verdict-strong' : s.verdict === 'Needs improvement' ? 'verdict-needs' : 'verdict-good';
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${s.date}</td>
+      <td class="ae-name">${s.ae}</td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.meeting}</td>
+      <td><span class="score-pill ${scoreClass(a)}">${fmt(a)}</span></td>
+      ${dims.map(d => `<td><span class="score-pill ${scoreClass(s[d])}">${s[d]}</span></td>`).join('')}
+      <td><span class="kpi-badge ${s.buying_intent === 'High' ? 'badge-green' : s.buying_intent === 'Low' ? 'badge-red' : 'badge-yellow'}">${s.buying_intent}</span></td>
+      <td style="font-size:11px;color:var(--text2)">${s.competitors !== 'None' ? s.competitors : '—'}</td>
+      <td class="${vClass}">${s.verdict}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+function chartOptions(title) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: title ? { display: false } : undefined,
+    },
+    scales: {
+      x: { ticks: { color: '#8b92a8', font: {size: 10} }, grid: { color: '#252a3a' } },
+      y: { ticks: { color: '#8b92a8', font: {size: 10} }, grid: { color: '#252a3a' }, min: 5, max: 10 }
+    }
+  };
+}
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+
+// ============================================================
+// HUBSPOT CORRELATION
+// ============================================================
+function renderHubspot() {
+  if (typeof AE_SUMMARY === 'undefined' || !AE_SUMMARY.length) return;
+  var data = AE_SUMMARY.filter(function(a) { return a.calls > 0; });
+
+  var byWR = data.slice().sort(function(a,b){ return b.win_rate - a.win_rate; });
+  var topWR = byWR[0];
+  document.getElementById('hs-top-wr').textContent = topWR ? topWR.win_rate + '%' : '--';
+  document.getElementById('hs-top-wr-sub').textContent = topWR ? topWR.ae.split(' ').slice(0,2).join(' ') : '';
+
+  var topC = data.slice().sort(function(a,b){ return (b.avg_score + b.win_rate/10) - (a.avg_score + a.win_rate/10); })[0];
+  document.getElementById('hs-top-combo').textContent = topC ? topC.ae.split(' ').slice(0,2).join(' ') : '--';
+  document.getElementById('hs-top-combo-sub').textContent = topC ? 'Score ' + topC.avg_score + ' - WR ' + topC.win_rate + '%' : '';
+
+  var risk = data.filter(function(a){ return a.closing < 7 && a.win_rate < 15; });
+  document.getElementById('hs-risk').textContent = risk.length;
+  document.getElementById('hs-risk-sub').textContent = risk.map(function(a){ return a.ae.split(' ')[0]; }).join(', ');
+
+  var avgWR = Math.round(data.reduce(function(s,a){ return s + a.win_rate; }, 0) / data.length);
+  document.getElementById('hs-avg-wr').textContent = avgWR + '%';
+
+  destroyChart('corrChart');
+  charts['corrChart'] = new Chart(document.getElementById('corrChart').getContext('2d'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'AEs',
+        data: data.map(function(a){ return { x: a.avg_score, y: a.win_rate, label: a.ae }; }),
+        backgroundColor: data.map(function(a){ return a.avg_score >= 7.5 && a.win_rate >= 20 ? '#06d6a0' : (a.avg_score < 7 || a.win_rate < 10 ? '#ff4757' : '#ffd166'); }),
+        pointRadius: 9, pointHoverRadius: 12
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx){ return ctx.raw.label + ' - Score: ' + ctx.raw.x + ' - WR: ' + ctx.raw.y + '%'; } } }
+      },
+      scales: {
+        x: { min: 5, max: 10, title: { display: true, text: 'Avg Coaching Score', color: '#8b92a8' }, ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } },
+        y: { min: 0, title: { display: true, text: 'Win Rate %', color: '#8b92a8' }, ticks: { color: '#8b92a8', callback: function(v){ return v + '%'; } }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  var sorted = data.slice().sort(function(a,b){ return b.win_rate - a.win_rate; });
+  destroyChart('wrChart');
+  charts['wrChart'] = new Chart(document.getElementById('wrChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(function(a){ return a.ae.split(' ')[0]; }),
+      datasets: [{ data: sorted.map(function(a){ return a.win_rate; }), backgroundColor: sorted.map(function(a){ return a.win_rate >= 30 ? '#06d6a0' : (a.win_rate >= 15 ? '#ffd166' : '#ff4757'); }), borderRadius: 5 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
+        y: { ticks: { color: '#8b92a8', callback: function(v){ return v + '%'; } }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  document.getElementById('hsCorrBody').innerHTML = data.slice().sort(function(a,b){ return b.avg_score - a.avg_score; }).map(function(a) {
+    var wrc = a.win_rate >= 30 ? 'score-high' : (a.win_rate >= 15 ? 'score-mid' : 'score-low');
+    var sc_cls = a.avg_score >= 8 ? 'score-high' : (a.avg_score >= 7 ? 'score-mid' : 'score-low');
+    var sem = a.avg_score >= 7.8 ? 'sem-green' : (a.avg_score >= 7 ? 'sem-yellow' : 'sem-red');
+    var cl_cls = a.closing >= 8 ? 'score-high' : (a.closing >= 7 ? 'score-mid' : 'score-low');
+    var ob_cls = a.objections >= 8 ? 'score-high' : (a.objections >= 7 ? 'score-mid' : 'score-low');
+    return '<tr>'
+      + '<td style="font-weight:500">' + a.ae + '</td>'
+      + '<td><span class="score-pill ' + sc_cls + '">' + a.avg_score + '</span></td>'
+      + '<td style="color:var(--text2)">' + a.calls + '</td>'
+      + '<td style="color:var(--green);font-weight:600">' + a.won + '</td>'
+      + '<td style="color:var(--red)">' + a.lost + '</td>'
+      + '<td style="color:var(--text2)">' + a.active + '</td>'
+      + '<td><span class="score-pill ' + wrc + '">' + a.win_rate + '%</span></td>'
+      + '<td><span class="score-pill ' + cl_cls + '">' + a.closing + '</span></td>'
+      + '<td><span class="score-pill ' + ob_cls + '">' + a.objections + '</span></td>'
+      + '<td><span class="sem ' + sem + '"></span></td>'
+      + '</tr>';
+  }).join('');
+}
+
+
+// ============================================================
+// CONVERSACION
+// ============================================================
+function renderConvo() {
+  // Only use scores that have conversation data (pct_ae_talk > 0)
+  var data = RAW_SCORES.filter(function(s) { return s.pct_ae_talk && s.pct_ae_talk > 0; });
+  
+  if (!data.length) {
+    document.getElementById('cv-count').textContent = '0';
+    document.getElementById('cv-ae-talk').textContent = '--';
+    document.getElementById('cv-ae-q').textContent = '--';
+    document.getElementById('cv-monologs').textContent = '--';
+    document.getElementById('cvTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:30px;">Las próximas calls analizadas aparecerán aquí automáticamente</td></tr>';
+    return;
+  }
+
+  var avgTalk = Math.round(data.reduce(function(s,d){ return s + (d.pct_ae_talk||0); }, 0) / data.length);
+  var avgQ = Math.round(data.reduce(function(s,d){ return s + (d.ae_questions||0); }, 0) / data.length);
+  var avgMono = Math.round(data.reduce(function(s,d){ return s + (d.ae_monologues||0); }, 0) / data.length * 10) / 10;
+
+  document.getElementById('cv-count').textContent = data.length;
+  document.getElementById('cv-ae-talk').textContent = avgTalk + '%';
+  document.getElementById('cv-ae-talk').style.color = avgTalk > 60 ? 'var(--red)' : avgTalk <= 50 ? 'var(--green)' : 'var(--yellow)';
+  document.getElementById('cv-ae-q').textContent = avgQ;
+  document.getElementById('cv-monologs').textContent = avgMono;
+
+  // Group by AE
+  var byAE = {};
+  data.forEach(function(d) {
+    if (!byAE[d.ae]) byAE[d.ae] = [];
+    byAE[d.ae].push(d);
+  });
+  var aes = Object.keys(byAE).sort(function(a,b) {
+    var ta = byAE[a].reduce(function(s,x){ return s+(x.pct_ae_talk||0); },0)/byAE[a].length;
+    var tb = byAE[b].reduce(function(s,x){ return s+(x.pct_ae_talk||0); },0)/byAE[b].length;
+    return tb - ta;
+  });
+
+  var talkAvgs = aes.map(function(ae) {
+    return Math.round(byAE[ae].reduce(function(s,x){ return s+(x.pct_ae_talk||0); },0)/byAE[ae].length);
+  });
+  var monoAvgs = aes.map(function(ae) {
+    return Math.round(byAE[ae].reduce(function(s,x){ return s+(x.ae_monologues||0); },0)/byAE[ae].length * 10)/10;
+  });
+
+  destroyChart('cvTalkChart');
+  charts['cvTalkChart'] = new Chart(document.getElementById('cvTalkChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: aes.map(function(ae){ return ae.split(' ')[0]; }),
+      datasets: [
+        { label: '% Habla AE', data: talkAvgs, backgroundColor: talkAvgs.map(function(v){ return v > 60 ? '#ff4757' : v <= 50 ? '#06d6a0' : '#ffd166'; }), borderRadius: 5 },
+        { label: 'Ideal 50%', data: aes.map(function(){ return 50; }), type: 'line', borderColor: 'rgba(255,255,255,0.3)', borderDash: [4,4], pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
+        y: { min: 0, max: 100, ticks: { color: '#8b92a8', callback: function(v){ return v+'%'; } }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  destroyChart('cvMonoChart');
+  charts['cvMonoChart'] = new Chart(document.getElementById('cvMonoChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: aes.map(function(ae){ return ae.split(' ')[0]; }),
+      datasets: [{ data: monoAvgs, backgroundColor: monoAvgs.map(function(v){ return v > 5 ? '#ff4757' : v > 3 ? '#ffd166' : '#06d6a0'; }), borderRadius: 5 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
+        y: { ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  // Populate AE filter
+  var aeEl = document.getElementById('cv-ae-filter');
+  while (aeEl.options.length > 1) aeEl.remove(1);
+  Object.keys(byAE).sort().forEach(function(ae){ aeEl.add(new Option(ae, ae)); });
+
+  filterCvTable();
+}
+
+function filterCvTable() {
+  var ae = document.getElementById('cv-ae-filter').value;
+  var data = RAW_SCORES.filter(function(s) {
+    return s.pct_ae_talk && s.pct_ae_talk > 0 && (!ae || s.ae === ae);
+  });
+  document.getElementById('cv-count-label').textContent = data.length + ' calls';
+
+  var sc = function(v) { return v >= 8 ? 'score-high' : v >= 7 ? 'score-mid' : 'score-low'; };
+  var talk_cls = function(v) { return v > 60 ? 'score-low' : v <= 50 ? 'score-high' : 'score-mid'; };
+
+  document.getElementById('cvTableBody').innerHTML = data.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }).map(function(d) {
+    var avg = d.discovery ? Math.round((d.discovery+d.business_impact+d.product+d.objections+d.rapport+d.next_steps+d.closing)/7*10)/10 : '--';
+    return '<tr>'
+      + '<td style="font-family:monospace;font-size:11px;color:var(--text2)">' + d.date + '</td>'
+      + '<td style="font-weight:500;font-size:12px;">' + (d.ae||'').split(' ').slice(0,2).join(' ') + '</td>'
+      + '<td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (d.meeting||'') + '">' + (d.meeting||'') + '</td>'
+      + '<td><span class="score-pill ' + talk_cls(d.pct_ae_talk) + '">' + d.pct_ae_talk + '%</span></td>'
+      + '<td style="color:var(--text2);">' + (d.pct_client_talk||'--') + '%</td>'
+      + '<td style="color:var(--text2);">' + (d.ae_questions||'--') + '</td>'
+      + '<td style="color:var(--text2);">' + (d.client_questions||'--') + '</td>'
+      + '<td><span class="score-pill ' + (d.ae_monologues > 5 ? 'score-low' : d.ae_monologues > 3 ? 'score-mid' : 'score-high') + '">' + (d.ae_monologues||'--') + '</span></td>'
+      + '<td><span class="score-pill ' + sc(avg) + '">' + avg + '</span></td>'
+      + '</tr>';
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:30px;">No hay calls con datos de conversación para este AE</td></tr>';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+// ─── LIVE DATA FETCH ────────────────────────────────────────
+function setLoaderProgress(pct, msg) {
+  var bar = document.getElementById('loader-bar');
+  var sub = document.getElementById('loader-sub');
+  if (bar) bar.style.width = pct + '%';
+  if (sub && msg) sub.textContent = msg;
+}
+
+function parseCSVtoScores(csv) {
+  var lines = csv.trim().split('\n');
+  var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
+  var rows = [];
+  for (var i = 1; i < lines.length; i++) {
+    var vals = [];
+    var cur = '';
+    var inQ = false;
+    for (var c = 0; c < lines[i].length; c++) {
+      var ch = lines[i][c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    vals.push(cur.trim());
+    if (vals.length < 5) continue;
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = vals[j] !== undefined ? vals[j].replace(/^"|"$/g,'') : '';
+    }
+    // Map column names to expected fields
+    var dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+    var score = {
+      date: (obj['Date'] || obj['date'] || '').substring(0, 10),
+      ae: obj['AE'] || obj['ae'] || '',
+      meeting: obj['Meeting title'] || obj['meeting'] || obj['Meeting Title'] || '',
+      buying_intent: obj['Buying Intent'] || obj['buying_intent'] || obj['Buying intent'] || 'Medium',
+      competitors: obj['Competitors'] || obj['competitors'] || 'None',
+      verdict: obj['Final Verdict'] || obj['verdict'] || obj['Final verdict'] || '',
+      pct_ae_talk: parseFloat(obj['% Habla AE'] || obj['pct_ae_talk'] || 0) || 0,
+      pct_client_talk: parseFloat(obj['% Habla Cliente'] || obj['pct_client_talk'] || 0) || 0,
+      ae_questions: parseInt(obj['Preguntas AE'] || obj['ae_questions'] || 0) || 0,
+      client_questions: parseInt(obj['Preguntas Cliente'] || obj['client_questions'] || 0) || 0,
+      ae_monologues: parseInt(obj['Monólogos AE'] || obj['ae_monologues'] || 0) || 0,
+    };
+    dims.forEach(function(d) {
+      var col = d.replace('_', ' ');
+      score[d] = parseFloat(obj[d] || obj[col] || obj[d.charAt(0).toUpperCase()+d.slice(1)] || 0) || 0;
+    });
+    if (score.ae && score.date) rows.push(score);
+  }
+  return rows;
+}
+
+function parseCSVtoDiag(csv) {
+  var lines = csv.trim().split('\n');
+  var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
+  var rows = [];
+  for (var i = 1; i < lines.length; i++) {
+    var vals = [];
+    var cur = '';
+    var inQ = false;
+    for (var c = 0; c < lines[i].length; c++) {
+      var ch = lines[i][c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    vals.push(cur.trim());
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = vals[j] !== undefined ? vals[j].replace(/^"|"$/g,'') : '';
+    }
+    var diag = {
+      date: (obj['Date'] || obj['date'] || '').substring(0, 10),
+      ae: obj['AE'] || obj['ae'] || '',
+      meeting: obj['Meeting title'] || obj['meeting'] || obj['Meeting Title'] || '',
+      category: obj['Category'] || obj['category'] || '',
+      diagnosis: obj['Diagnosis'] || obj['diagnosis'] || '',
+    };
+    if (diag.ae && diag.date && diag.category) rows.push(diag);
+  }
+  return rows;
+}
+
+async function loadData() {
+  try {
+    setLoaderProgress(10, 'Descargando scores de calls...');
+
+    var scoresRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=2036219614');
+    if (!scoresRes.ok) throw new Error('No se pudo acceder al Sheet de Scores');
+    var scoresCSV = await scoresRes.text();
+    RAW_SCORES = parseCSVtoScores(scoresCSV);
+    setLoaderProgress(50, 'Descargando diagnósticos...');
+
+    var diagRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=0');
+    if (!diagRes.ok) throw new Error('No se pudo acceder al Sheet de Diagnósticos');
+    var diagCSV = await diagRes.text();
+    RAW_DIAG = parseCSVtoDiag(diagCSV);
+    setLoaderProgress(90, 'Renderizando dashboard...');
+
+    // Hide loader
+    setTimeout(function() {
+      var loader = document.getElementById('loader');
+      if (loader) loader.style.display = 'none';
+    }, 300);
+
+    populateSelects();
+    renderAll();
+
+    // Update last-refresh label if exists
+    var ts = document.getElementById('last-refresh');
+    if (ts) ts.textContent = 'Actualizado: ' + new Date().toLocaleString('es-AR');
+
+  } catch(err) {
+    var loader = document.getElementById('loader');
+    if (loader) loader.innerHTML = '<div style="color:#ff4757;font-size:16px;text-align:center;padding:40px;">⚠️ Error al cargar datos<br><br><span style="font-size:12px;color:#8b92a8;">' + err.message + '<br><br>Asegurate de abrir este archivo desde un servidor web,<br>no directamente desde tu computadora (file://).<br><br>Subilo a Google Sites o GitHub Pages.</span><br><br><button onclick="loadData()" style="margin-top:20px;padding:10px 20px;background:#4f7cff;color:white;border:none;border-radius:6px;cursor:pointer;">Reintentar</button></div>';
+  }
+}
+
+loadData();
+
+</script>
+</body>
+</html>
