@@ -458,7 +458,7 @@
   <div class="tab" onclick="showTab('team')">👥 Equipo</div>
   <div class="tab" onclick="showTab('areas')">🎯 Áreas de Mejora</div>
   <div class="tab" onclick="showTab('calls')">📞 Calls</div>
-  <div class="tab" onclick="showTab('hubspot')">💰 Score vs Results</div>
+  <div class="tab" onclick="showTab('evolution')">📈 Evolución</div>
   <div class="tab" onclick="showTab('convo')">🎙️ Conversación</div>
 </div>
 
@@ -676,44 +676,37 @@
   </div>
 
 
-  <!-- TAB: SCORE VS RESULTS -->
-  <div id="tab-hubspot" class="tab-content">
+
+  <!-- TAB: EVOLUCIÓN -->
+  <div id="tab-evolution" class="tab-content">
     <div class="grid-4" style="margin-bottom:20px;">
-      <div class="card"><div class="card-title">Highest Win Rate</div><div class="kpi-value" id="hs-top-wr" style="font-size:28px;color:var(--green)">--</div><div class="kpi-sub" id="hs-top-wr-sub"></div></div>
-      <div class="card"><div class="card-title">Best Score + Win Rate</div><div class="kpi-value" id="hs-top-combo" style="font-size:20px;line-height:1.2">--</div><div class="kpi-sub" id="hs-top-combo-sub"></div></div>
-      <div class="card"><div class="card-title">At Risk AEs</div><div class="kpi-value" id="hs-risk" style="font-size:34px;color:var(--red)">--</div><div class="kpi-sub" id="hs-risk-sub">Low score + Low win rate</div></div>
-      <div class="card"><div class="card-title">Team Avg Win Rate</div><div class="kpi-value" id="hs-avg-wr" style="font-size:34px;">--</div><div class="kpi-sub">across all AEs</div></div>
+      <div class="card"><div class="card-title">Calls este mes</div><div class="kpi-value" id="ev-calls-month" style="font-size:34px;">--</div><div class="kpi-sub" id="ev-calls-month-sub"></div></div>
+      <div class="card"><div class="card-title">Score promedio este mes</div><div class="kpi-value" id="ev-score-month" style="font-size:34px;">--</div><div class="kpi-sub" id="ev-score-sub"></div></div>
+      <div class="card"><div class="card-title">Mejor AE este mes</div><div class="kpi-value" id="ev-top-ae" style="font-size:22px;line-height:1.2">--</div><div class="kpi-sub" id="ev-top-ae-sub"></div></div>
+      <div class="card"><div class="card-title">Tendencia equipo</div><div class="kpi-value" id="ev-trend" style="font-size:34px;">--</div><div class="kpi-sub" id="ev-trend-sub"></div></div>
     </div>
     <div class="grid-2" style="margin-bottom:20px;">
       <div class="card">
-        <div class="card-title">Coaching Score vs Win Rate</div>
-        <div class="chart-wrap-lg"><canvas id="corrChart"></canvas></div>
-        <div style="font-size:10px;color:var(--text2);margin-top:8px;">
-          <span style="color:#06d6a0">&#9679;</span> High score + High WR &nbsp;
-          <span style="color:#ffd166">&#9679;</span> Mixed &nbsp;
-          <span style="color:#ff4757">&#9679;</span> Needs attention
-        </div>
+        <div class="card-title">Score promedio del equipo por semana</div>
+        <div class="chart-wrap-lg"><canvas id="evTeamChart"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-title">Win Rate by AE</div>
-        <div class="chart-wrap-lg"><canvas id="wrChart"></canvas></div>
+        <div class="card-title">Evolución por AE — últimas 8 semanas</div>
+        <div class="chart-wrap-lg"><canvas id="evAEChart"></canvas></div>
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Full AE Table — Coaching Score x Commercial Results</div>
+      <div class="card-title">Score por AE — comparativa mes actual vs mes anterior</div>
       <div class="scroll-table">
         <table class="ae-table">
           <thead><tr>
-            <th>AE</th><th>Avg Score</th><th>Calls</th>
-            <th>Won</th><th>Lost</th><th>Active</th><th>Win Rate</th>
-            <th>Closing</th><th>Objections</th><th>Status</th>
+            <th>AE</th><th>Mes anterior</th><th>Mes actual</th><th>Diferencia</th><th>Calls este mes</th><th>Tendencia</th>
           </tr></thead>
-          <tbody id="hsCorrBody"></tbody>
+          <tbody id="evCompBody"></tbody>
         </table>
       </div>
     </div>
   </div>
-
 
   <!-- TAB: CONVERSACION -->
   <div id="tab-convo" class="tab-content">
@@ -898,7 +891,7 @@ function renderAll() {
   renderTeam();
   renderAreas();
   renderCalls();
-  renderHubspot();
+  renderEvolution();
   renderConvo();
 }
 
@@ -1343,207 +1336,143 @@ function destroyChart(id) {
 }
 
 
+
 // ============================================================
-// HUBSPOT CORRELATION
+// EVOLUCIÓN
 // ============================================================
-function renderHubspot() {
-  if (typeof AE_SUMMARY === 'undefined' || !AE_SUMMARY.length) return;
-  var data = AE_SUMMARY.filter(function(a) { return a.calls > 0; });
+function renderEvolution() {
+  if (!RAW_SCORES || !RAW_SCORES.length) return;
+  var dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
 
-  var byWR = data.slice().sort(function(a,b){ return b.win_rate - a.win_rate; });
-  var topWR = byWR[0];
-  document.getElementById('hs-top-wr').textContent = topWR ? topWR.win_rate + '%' : '--';
-  document.getElementById('hs-top-wr-sub').textContent = topWR ? topWR.ae.split(' ').slice(0,2).join(' ') : '';
+  function avgScore(arr) {
+    if (!arr.length) return 0;
+    return Math.round(arr.reduce(function(s,x){ return s + dims.reduce(function(a,d){ return a+(x[d]||0); },0)/7; },0)/arr.length*10)/10;
+  }
 
-  var topC = data.slice().sort(function(a,b){ return (b.avg_score + b.win_rate/10) - (a.avg_score + a.win_rate/10); })[0];
-  document.getElementById('hs-top-combo').textContent = topC ? topC.ae.split(' ').slice(0,2).join(' ') : '--';
-  document.getElementById('hs-top-combo-sub').textContent = topC ? 'Score ' + topC.avg_score + ' - WR ' + topC.win_rate + '%' : '';
+  // Group by week
+  var byWeek = {};
+  RAW_SCORES.forEach(function(s) {
+    if (!s.date) return;
+    var d = new Date(s.date);
+    if (isNaN(d)) return;
+    // Get Monday of that week
+    var day = d.getDay();
+    var monday = new Date(d);
+    monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+    var wk = monday.toISOString().substring(0,10);
+    if (!byWeek[wk]) byWeek[wk] = [];
+    byWeek[wk].push(s);
+  });
 
-  var risk = data.filter(function(a){ return a.closing < 7 && a.win_rate < 15; });
-  document.getElementById('hs-risk').textContent = risk.length;
-  document.getElementById('hs-risk-sub').textContent = risk.map(function(a){ return a.ae.split(' ')[0]; }).join(', ');
+  var weeks = Object.keys(byWeek).sort().slice(-12);
 
-  var avgWR = Math.round(data.reduce(function(s,a){ return s + a.win_rate; }, 0) / data.length);
-  document.getElementById('hs-avg-wr').textContent = avgWR + '%';
-
-  destroyChart('corrChart');
-  charts['corrChart'] = new Chart(document.getElementById('corrChart').getContext('2d'), {
-    type: 'scatter',
+  // Team chart
+  destroyChart('evTeamChart');
+  charts['evTeamChart'] = new Chart(document.getElementById('evTeamChart').getContext('2d'), {
+    type: 'line',
     data: {
+      labels: weeks.map(function(w){ return w.substring(5); }),
       datasets: [{
-        label: 'AEs',
-        data: data.map(function(a){ return { x: a.avg_score, y: a.win_rate, label: a.ae }; }),
-        backgroundColor: data.map(function(a){ return a.avg_score >= 7.5 && a.win_rate >= 20 ? '#06d6a0' : (a.avg_score < 7 || a.win_rate < 10 ? '#ff4757' : '#ffd166'); }),
-        pointRadius: 9, pointHoverRadius: 12
+        label: 'Score promedio equipo',
+        data: weeks.map(function(w){ return avgScore(byWeek[w]); }),
+        borderColor: '#4f7cff', backgroundColor: 'rgba(79,124,255,0.1)',
+        borderWidth: 2, pointRadius: 4, tension: 0.3, fill: true
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: function(ctx){ return ctx.raw.label + ' - Score: ' + ctx.raw.x + ' - WR: ' + ctx.raw.y + '%'; } } }
-      },
-      scales: {
-        x: { min: 5, max: 10, title: { display: true, text: 'Avg Coaching Score', color: '#8b92a8' }, ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } },
-        y: { min: 0, title: { display: true, text: 'Win Rate %', color: '#8b92a8' }, ticks: { color: '#8b92a8', callback: function(v){ return v + '%'; } }, grid: { color: '#252a3a' } }
-      }
-    }
-  });
-
-  var sorted = data.slice().sort(function(a,b){ return b.win_rate - a.win_rate; });
-  destroyChart('wrChart');
-  charts['wrChart'] = new Chart(document.getElementById('wrChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: sorted.map(function(a){ return a.ae.split(' ')[0]; }),
-      datasets: [{ data: sorted.map(function(a){ return a.win_rate; }), backgroundColor: sorted.map(function(a){ return a.win_rate >= 30 ? '#06d6a0' : (a.win_rate >= 15 ? '#ffd166' : '#ff4757'); }), borderRadius: 5 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
-        y: { ticks: { color: '#8b92a8', callback: function(v){ return v + '%'; } }, grid: { color: '#252a3a' } }
+        y: { min: 5, max: 10, ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } }
       }
     }
   });
 
-  document.getElementById('hsCorrBody').innerHTML = data.slice().sort(function(a,b){ return b.avg_score - a.avg_score; }).map(function(a) {
-    var wrc = a.win_rate >= 30 ? 'score-high' : (a.win_rate >= 15 ? 'score-mid' : 'score-low');
-    var sc_cls = a.avg_score >= 8 ? 'score-high' : (a.avg_score >= 7 ? 'score-mid' : 'score-low');
-    var sem = a.avg_score >= 7.8 ? 'sem-green' : (a.avg_score >= 7 ? 'sem-yellow' : 'sem-red');
-    var cl_cls = a.closing >= 8 ? 'score-high' : (a.closing >= 7 ? 'score-mid' : 'score-low');
-    var ob_cls = a.objections >= 8 ? 'score-high' : (a.objections >= 7 ? 'score-mid' : 'score-low');
+  // KPIs
+  var now = new Date();
+  var thisMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  var lastMonth = new Date(now.getFullYear(), now.getMonth()-1, 1);
+  var lastMonthStr = lastMonth.getFullYear() + '-' + String(lastMonth.getMonth()+1).padStart(2,'0');
+
+  var thisMonthScores = RAW_SCORES.filter(function(s){ return s.date && s.date.substring(0,7) === thisMonth; });
+  var lastMonthScores = RAW_SCORES.filter(function(s){ return s.date && s.date.substring(0,7) === lastMonthStr; });
+
+  document.getElementById('ev-calls-month').textContent = thisMonthScores.length;
+  document.getElementById('ev-calls-month-sub').textContent = 'vs ' + lastMonthScores.length + ' el mes anterior';
+
+  var scoreThis = avgScore(thisMonthScores);
+  var scoreLast = avgScore(lastMonthScores);
+  document.getElementById('ev-score-month').textContent = scoreThis || '--';
+  document.getElementById('ev-score-sub').textContent = scoreLast ? 'vs ' + scoreLast + ' mes anterior' : '';
+
+  var diff = scoreThis && scoreLast ? Math.round((scoreThis - scoreLast)*10)/10 : 0;
+  var trendEl = document.getElementById('ev-trend');
+  trendEl.textContent = diff > 0 ? '+' + diff : (diff < 0 ? diff : '→');
+  trendEl.style.color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--text2)';
+  document.getElementById('ev-trend-sub').textContent = 'vs mes anterior';
+
+  // Top AE this month
+  var byAEMonth = {};
+  thisMonthScores.forEach(function(s){ if (!byAEMonth[s.ae]) byAEMonth[s.ae]=[]; byAEMonth[s.ae].push(s); });
+  var topAE = Object.keys(byAEMonth).sort(function(a,b){ return avgScore(byAEMonth[b]) - avgScore(byAEMonth[a]); })[0];
+  document.getElementById('ev-top-ae').textContent = topAE ? topAE.split(' ').slice(0,2).join(' ') : '--';
+  document.getElementById('ev-top-ae-sub').textContent = topAE ? avgScore(byAEMonth[topAE]) + '/10' : '';
+
+  // AE evolution chart - top 5 AEs by call count
+  var byAE = {};
+  RAW_SCORES.forEach(function(s){ if (!byAE[s.ae]) byAE[s.ae]=[]; byAE[s.ae].push(s); });
+  var top5 = Object.keys(byAE).sort(function(a,b){ return byAE[b].length-byAE[a].length; }).slice(0,5);
+  var colors = ['#4f7cff','#06d6a0','#ffd166','#ff4757','#a29bfe'];
+  var last8 = weeks.slice(-8);
+
+  destroyChart('evAEChart');
+  charts['evAEChart'] = new Chart(document.getElementById('evAEChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: last8.map(function(w){ return w.substring(5); }),
+      datasets: top5.map(function(ae, i) {
+        return {
+          label: ae.split(' ')[0],
+          data: last8.map(function(w){
+            var wScores = (byWeek[w]||[]).filter(function(s){ return s.ae===ae; });
+            return wScores.length ? avgScore(wScores) : null;
+          }),
+          borderColor: colors[i], borderWidth: 2, pointRadius: 3,
+          tension: 0.3, spanGaps: true
+        };
+      })
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { color: '#8b92a8', font: { size: 9 }, boxWidth: 10 } } },
+      scales: {
+        x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
+        y: { min: 5, max: 10, ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  // Comparison table
+  var allAEs = Object.keys(byAE).sort();
+  document.getElementById('evCompBody').innerHTML = allAEs.map(function(ae) {
+    var tm = (byAEMonth[ae] || []);
+    var lm = lastMonthScores.filter(function(s){ return s.ae === ae; });
+    var scoreT = avgScore(tm);
+    var scoreL = avgScore(lm);
+    var d = scoreT && scoreL ? Math.round((scoreT-scoreL)*10)/10 : null;
+    var arrow = d === null ? '—' : d > 0 ? '▲ +'+d : d < 0 ? '▼ '+d : '→ 0';
+    var arrowColor = d === null ? 'var(--text2)' : d > 0 ? 'var(--green)' : d < 0 ? 'var(--red)' : 'var(--text2)';
+    var sc = function(v){ return v >= 8 ? 'score-high' : v >= 7 ? 'score-mid' : 'score-low'; };
     return '<tr>'
-      + '<td style="font-weight:500">' + a.ae + '</td>'
-      + '<td><span class="score-pill ' + sc_cls + '">' + a.avg_score + '</span></td>'
-      + '<td style="color:var(--text2)">' + a.calls + '</td>'
-      + '<td style="color:var(--green);font-weight:600">' + a.won + '</td>'
-      + '<td style="color:var(--red)">' + a.lost + '</td>'
-      + '<td style="color:var(--text2)">' + a.active + '</td>'
-      + '<td><span class="score-pill ' + wrc + '">' + a.win_rate + '%</span></td>'
-      + '<td><span class="score-pill ' + cl_cls + '">' + a.closing + '</span></td>'
-      + '<td><span class="score-pill ' + ob_cls + '">' + a.objections + '</span></td>'
-      + '<td><span class="sem ' + sem + '"></span></td>'
+      + '<td style="font-weight:500">' + ae + '</td>'
+      + '<td>' + (scoreL ? '<span class="score-pill '+sc(scoreL)+'">'+scoreL+'</span>' : '<span style="color:var(--text2)">—</span>') + '</td>'
+      + '<td>' + (scoreT ? '<span class="score-pill '+sc(scoreT)+'">'+scoreT+'</span>' : '<span style="color:var(--text2)">—</span>') + '</td>'
+      + '<td style="color:'+arrowColor+';font-weight:600">' + arrow + '</td>'
+      + '<td style="color:var(--text2)">' + tm.length + '</td>'
+      + '<td style="color:'+arrowColor+'">' + (d > 0 ? '↑ mejorando' : d < 0 ? '↓ bajando' : d === 0 ? '→ estable' : '—') + '</td>'
       + '</tr>';
   }).join('');
-}
-
-
-// ============================================================
-// CONVERSACION
-// ============================================================
-function renderConvo() {
-  // Only use scores that have conversation data (pct_ae_talk > 0)
-  var data = RAW_SCORES.filter(function(s) { return s.pct_ae_talk && s.pct_ae_talk > 0; });
-  
-  if (!data.length) {
-    document.getElementById('cv-count').textContent = '0';
-    document.getElementById('cv-ae-talk').textContent = '--';
-    document.getElementById('cv-ae-q').textContent = '--';
-    document.getElementById('cv-monologs').textContent = '--';
-    document.getElementById('cvTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:30px;">Las próximas calls analizadas aparecerán aquí automáticamente</td></tr>';
-    return;
-  }
-
-  var avgTalk = Math.round(data.reduce(function(s,d){ return s + (d.pct_ae_talk||0); }, 0) / data.length);
-  var avgQ = Math.round(data.reduce(function(s,d){ return s + (d.ae_questions||0); }, 0) / data.length);
-  var avgMono = Math.round(data.reduce(function(s,d){ return s + (d.ae_monologues||0); }, 0) / data.length * 10) / 10;
-
-  document.getElementById('cv-count').textContent = data.length;
-  document.getElementById('cv-ae-talk').textContent = avgTalk + '%';
-  document.getElementById('cv-ae-talk').style.color = avgTalk > 60 ? 'var(--red)' : avgTalk <= 50 ? 'var(--green)' : 'var(--yellow)';
-  document.getElementById('cv-ae-q').textContent = avgQ;
-  document.getElementById('cv-monologs').textContent = avgMono;
-
-  // Group by AE
-  var byAE = {};
-  data.forEach(function(d) {
-    if (!byAE[d.ae]) byAE[d.ae] = [];
-    byAE[d.ae].push(d);
-  });
-  var aes = Object.keys(byAE).sort(function(a,b) {
-    var ta = byAE[a].reduce(function(s,x){ return s+(x.pct_ae_talk||0); },0)/byAE[a].length;
-    var tb = byAE[b].reduce(function(s,x){ return s+(x.pct_ae_talk||0); },0)/byAE[b].length;
-    return tb - ta;
-  });
-
-  var talkAvgs = aes.map(function(ae) {
-    return Math.round(byAE[ae].reduce(function(s,x){ return s+(x.pct_ae_talk||0); },0)/byAE[ae].length);
-  });
-  var monoAvgs = aes.map(function(ae) {
-    return Math.round(byAE[ae].reduce(function(s,x){ return s+(x.ae_monologues||0); },0)/byAE[ae].length * 10)/10;
-  });
-
-  destroyChart('cvTalkChart');
-  charts['cvTalkChart'] = new Chart(document.getElementById('cvTalkChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: aes.map(function(ae){ return ae.split(' ')[0]; }),
-      datasets: [
-        { label: '% Habla AE', data: talkAvgs, backgroundColor: talkAvgs.map(function(v){ return v > 60 ? '#ff4757' : v <= 50 ? '#06d6a0' : '#ffd166'; }), borderRadius: 5 },
-        { label: 'Ideal 50%', data: aes.map(function(){ return 50; }), type: 'line', borderColor: 'rgba(255,255,255,0.3)', borderDash: [4,4], pointRadius: 0, fill: false }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
-        y: { min: 0, max: 100, ticks: { color: '#8b92a8', callback: function(v){ return v+'%'; } }, grid: { color: '#252a3a' } }
-      }
-    }
-  });
-
-  destroyChart('cvMonoChart');
-  charts['cvMonoChart'] = new Chart(document.getElementById('cvMonoChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: aes.map(function(ae){ return ae.split(' ')[0]; }),
-      datasets: [{ data: monoAvgs, backgroundColor: monoAvgs.map(function(v){ return v > 5 ? '#ff4757' : v > 3 ? '#ffd166' : '#06d6a0'; }), borderRadius: 5 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#8b92a8', font: { size: 9 } }, grid: { color: '#252a3a' } },
-        y: { ticks: { color: '#8b92a8' }, grid: { color: '#252a3a' } }
-      }
-    }
-  });
-
-  // Populate AE filter
-  var aeEl = document.getElementById('cv-ae-filter');
-  while (aeEl.options.length > 1) aeEl.remove(1);
-  Object.keys(byAE).sort().forEach(function(ae){ aeEl.add(new Option(ae, ae)); });
-
-  filterCvTable();
-}
-
-function filterCvTable() {
-  var ae = document.getElementById('cv-ae-filter').value;
-  var data = RAW_SCORES.filter(function(s) {
-    return s.pct_ae_talk && s.pct_ae_talk > 0 && (!ae || s.ae === ae);
-  });
-  document.getElementById('cv-count-label').textContent = data.length + ' calls';
-
-  var sc = function(v) { return v >= 8 ? 'score-high' : v >= 7 ? 'score-mid' : 'score-low'; };
-  var talk_cls = function(v) { return v > 60 ? 'score-low' : v <= 50 ? 'score-high' : 'score-mid'; };
-
-  document.getElementById('cvTableBody').innerHTML = data.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }).map(function(d) {
-    var avg = d.discovery ? Math.round((d.discovery+d.business_impact+d.product+d.objections+d.rapport+d.next_steps+d.closing)/7*10)/10 : '--';
-    return '<tr>'
-      + '<td style="font-family:monospace;font-size:11px;color:var(--text2)">' + d.date + '</td>'
-      + '<td style="font-weight:500;font-size:12px;">' + (d.ae||'').split(' ').slice(0,2).join(' ') + '</td>'
-      + '<td style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (d.meeting||'') + '">' + (d.meeting||'') + '</td>'
-      + '<td><span class="score-pill ' + talk_cls(d.pct_ae_talk) + '">' + d.pct_ae_talk + '%</span></td>'
-      + '<td style="color:var(--text2);">' + (d.pct_client_talk||'--') + '%</td>'
-      + '<td style="color:var(--text2);">' + (d.ae_questions||'--') + '</td>'
-      + '<td style="color:var(--text2);">' + (d.client_questions||'--') + '</td>'
-      + '<td><span class="score-pill ' + (d.ae_monologues > 5 ? 'score-low' : d.ae_monologues > 3 ? 'score-mid' : 'score-high') + '">' + (d.ae_monologues||'--') + '</span></td>'
-      + '<td><span class="score-pill ' + sc(avg) + '">' + avg + '</span></td>'
-      + '</tr>';
-  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:30px;">No hay calls con datos de conversación para este AE</td></tr>';
 }
 
 // ============================================================
@@ -1644,7 +1573,7 @@ function parseCSVtoDiag(csv) {
       date: parsedDate2,
       ae: obj['AE'] || obj['ae'] || '',
       meeting: obj['Meeting title'] || obj['Meeting Title'] || obj['meeting'] || '',
-      category: obj['Category'] || obj['category'] || '',
+      category: (obj['Category'] || obj['category'] || '').trim(),
       diagnosis: obj['Diagnosis'] || obj['diagnosis'] || '',
     };
     if (diag.ae && diag.date && diag.category) rows.push(diag);
