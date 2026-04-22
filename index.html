@@ -1632,10 +1632,18 @@ function parseCSVtoDiag(csv) {
     for (var j = 0; j < headers.length; j++) {
       obj[headers[j]] = vals[j] !== undefined ? vals[j].replace(/^"|"$/g,'') : '';
     }
+    var rawDate2 = obj['Date'] || obj['date'] || '';
+    var parsedDate2 = '';
+    if (rawDate2.match(/^\d{2}\/\d{2}\/\d{2}/)) {
+      var dp2 = rawDate2.split('/');
+      parsedDate2 = '20' + dp2[2].substring(0,2) + '-' + dp2[0] + '-' + dp2[1];
+    } else {
+      parsedDate2 = rawDate2.substring(0, 10);
+    }
     var diag = {
-      date: (obj['Date'] || obj['date'] || '').substring(0, 10),
+      date: parsedDate2,
       ae: obj['AE'] || obj['ae'] || '',
-      meeting: obj['Meeting title'] || obj['meeting'] || obj['Meeting Title'] || '',
+      meeting: obj['Meeting title'] || obj['Meeting Title'] || obj['meeting'] || '',
       category: obj['Category'] || obj['category'] || '',
       diagnosis: obj['Diagnosis'] || obj['diagnosis'] || '',
     };
@@ -1666,6 +1674,22 @@ async function loadData() {
       if (loader) loader.style.display = 'none';
     }, 300);
 
+    // Compute AE_SUMMARY from loaded scores
+    var dims2 = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+    var aeMap2 = {};
+    RAW_SCORES.forEach(function(s) {
+      if (!s.ae) return;
+      if (!aeMap2[s.ae]) aeMap2[s.ae] = [];
+      aeMap2[s.ae].push(s);
+    });
+    AE_SUMMARY = Object.keys(aeMap2).map(function(ae) {
+      var sl = aeMap2[ae];
+      var avg = sl.reduce(function(sum,s){ return sum + dims2.reduce(function(a,d){ return a+(s[d]||0); },0)/7; }, 0) / sl.length;
+      var entry = { ae: ae, calls: sl.length, avg_score: Math.round(avg*100)/100, won: 0, lost: 0, active: 0, win_rate: 0, won_value: 0 };
+      dims2.forEach(function(d) { entry[d] = Math.round(sl.reduce(function(a,s){ return a+(s[d]||0); },0)/sl.length*10)/10; });
+      return entry;
+    });
+    AE_SUMMARY.sort(function(a,b){ return b.avg_score - a.avg_score; });
     populateSelects();
     renderAll();
 
