@@ -1578,25 +1578,36 @@ function parseCSVtoScores(csv) {
     for (var j = 0; j < headers.length; j++) {
       obj[headers[j]] = vals[j] !== undefined ? vals[j].replace(/^"|"$/g,'') : '';
     }
-    // Map column names to expected fields
-    var dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+    // Fix date: "02/19/26 5:18 PM" -> "2026-02-19"
+    var rawDate = obj['Date'] || obj['date'] || '';
+    var parsedDate = '';
+    if (rawDate.match(/^\d{2}\/\d{2}\/\d{2}/)) {
+      var dp = rawDate.split('/');
+      var yr = '20' + dp[2].substring(0,2);
+      parsedDate = yr + '-' + dp[0] + '-' + dp[1];
+    } else {
+      parsedDate = rawDate.substring(0, 10);
+    }
     var score = {
-      date: (obj['Date'] || obj['date'] || '').substring(0, 10),
+      date: parsedDate,
       ae: obj['AE'] || obj['ae'] || '',
-      meeting: obj['Meeting title'] || obj['meeting'] || obj['Meeting Title'] || '',
-      buying_intent: obj['Buying Intent'] || obj['buying_intent'] || obj['Buying intent'] || 'Medium',
+      meeting: obj['Meeting title'] || obj['Meeting Title'] || obj['meeting'] || '',
+      buying_intent: obj['Buying Intent'] || obj['Buying intent'] || obj['buying_intent'] || 'Medium',
       competitors: obj['Competitors'] || obj['competitors'] || 'None',
-      verdict: obj['Final Verdict'] || obj['verdict'] || obj['Final verdict'] || '',
-      pct_ae_talk: parseFloat(obj['% Habla AE'] || obj['pct_ae_talk'] || 0) || 0,
-      pct_client_talk: parseFloat(obj['% Habla Cliente'] || obj['pct_client_talk'] || 0) || 0,
-      ae_questions: parseInt(obj['Preguntas AE'] || obj['ae_questions'] || 0) || 0,
-      client_questions: parseInt(obj['Preguntas Cliente'] || obj['client_questions'] || 0) || 0,
-      ae_monologues: parseInt(obj['Monólogos AE'] || obj['ae_monologues'] || 0) || 0,
+      verdict: obj['Final Verdict'] || obj['Final verdict'] || obj['verdict'] || '',
+      pct_ae_talk: parseFloat(obj['% Habla AE'] || 0) || 0,
+      pct_client_talk: parseFloat(obj['% Habla Cliente'] || 0) || 0,
+      ae_questions: parseInt(obj['Preguntas AE'] || 0) || 0,
+      client_questions: parseInt(obj['Preguntas Cliente'] || 0) || 0,
+      ae_monologues: parseInt(obj['Monólogos AE'] || obj['Monolagos AE'] || 0) || 0,
+      discovery: parseFloat(obj['Discovery'] || obj['discovery'] || 0) || 0,
+      business_impact: parseFloat(obj['Business Impact'] || obj['business_impact'] || 0) || 0,
+      product: parseFloat(obj['Product'] || obj['product'] || 0) || 0,
+      objections: parseFloat(obj['Objections'] || obj['objections'] || 0) || 0,
+      rapport: parseFloat(obj['Rapport'] || obj['rapport'] || 0) || 0,
+      next_steps: parseFloat(obj['Next Steps'] || obj['Next steps'] || obj['next_steps'] || 0) || 0,
+      closing: parseFloat(obj['Closing'] || obj['closing'] || 0) || 0,
     };
-    dims.forEach(function(d) {
-      var col = d.replace('_', ' ');
-      score[d] = parseFloat(obj[d] || obj[col] || obj[d.charAt(0).toUpperCase()+d.slice(1)] || 0) || 0;
-    });
     if (score.ae && score.date) rows.push(score);
   }
   return rows;
