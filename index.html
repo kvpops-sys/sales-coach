@@ -447,6 +447,15 @@
     <button class="filter-btn active" onclick="setPeriod(30, this)">30 días</button>
     <button class="filter-btn" onclick="setPeriod(60, this)">60 días</button>
     <button class="filter-btn" onclick="setPeriod(0, this)">Todo</button>
+    <select id="squadFilter" onchange="applyFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;outline:none;">
+      <option value="">Todos los Squads</option>
+    </select>
+    <select id="regionFilter" onchange="applyFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;outline:none;">
+      <option value="">Todas las Regiones</option>
+    </select>
+    <select id="segmentFilter" onchange="applyFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;outline:none;">
+      <option value="">Todos los Segmentos</option>
+    </select>
     <select id="aeFilter" onchange="applyFilters()">
       <option value="">Todos los AEs</option>
     </select>
@@ -780,13 +789,32 @@ function getDateLimit() {
   return d;
 }
 
+function getMetaForAE(aeName) {
+  if (!aeName || !AE_META) return {};
+  if (AE_META[aeName]) return AE_META[aeName];
+  const lower = aeName.toLowerCase();
+  for (const [key, val] of Object.entries(AE_META)) {
+    if (key.toLowerCase().split(' ')[0] === lower.split(' ')[0]) return val;
+  }
+  return {};
+}
+
 function filterByPeriodAndAE(arr) {
   const limit = getDateLimit();
+  const squad = document.getElementById('squadFilter') ? document.getElementById('squadFilter').value : '';
+  const region = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
+  const segment = document.getElementById('segmentFilter') ? document.getElementById('segmentFilter').value : '';
   return arr.filter(r => {
     const d = new Date(r.date);
-    const dateOk = d >= limit;
-    const aeOk = !selectedAE || r.ae === selectedAE;
-    return dateOk && aeOk;
+    if (d < limit) return false;
+    if (selectedAE && r.ae !== selectedAE) return false;
+    if (squad || region || segment) {
+      const meta = getMetaForAE(r.ae);
+      if (squad && meta.squad !== squad) return false;
+      if (region && meta.region !== region) return false;
+      if (segment && meta.segment !== segment) return false;
+    }
+    return true;
   });
 }
 
@@ -828,6 +856,15 @@ const CAT_COLORS = {
 // POPULATE SELECTS
 // ============================================================
 function populateSelects() {
+  const squads = [...new Set(Object.values(AE_META).map(m => m.squad).filter(Boolean))].sort();
+  const regions = [...new Set(Object.values(AE_META).map(m => m.region).filter(Boolean))].sort();
+  const segments = [...new Set(Object.values(AE_META).map(m => m.segment).filter(Boolean))].sort();
+  const squadEl = document.getElementById('squadFilter');
+  if (squadEl) { while(squadEl.options.length>1) squadEl.remove(1); squads.forEach(s => squadEl.add(new Option(s,s))); }
+  const regionEl = document.getElementById('regionFilter');
+  if (regionEl) { while(regionEl.options.length>1) regionEl.remove(1); regions.forEach(r => regionEl.add(new Option(r,r))); }
+  const segmentEl = document.getElementById('segmentFilter');
+  if (segmentEl) { while(segmentEl.options.length>1) segmentEl.remove(1); segments.forEach(s => segmentEl.add(new Option(s,s))); }
   const aes = [...new Set(RAW_SCORES.map(s => s.ae).filter(Boolean))].sort();
 
   ['aeFilter', 'aeRadarSelect', 'aeDiagFilter', 'callsAEFilter'].forEach(id => {
