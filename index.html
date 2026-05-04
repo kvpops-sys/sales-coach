@@ -757,6 +757,7 @@
 // DATA
 // ============================================================
 let RAW_SCORES = [];
+let AE_META = {};
 
 let RAW_DIAG = [];
 
@@ -1581,6 +1582,33 @@ function parseCSVtoDiag(csv) {
   return rows;
 }
 
+
+  function parseCSVtoMeta(csv) {
+  var lines = csv.trim().split('\n');
+  var meta = {};
+  for (var i = 1; i < lines.length; i++) {
+    var vals = [];
+    var cur = '';
+    var inQ = false;
+    for (var c = 0; c < lines[i].length; c++) {
+      var ch = lines[i][c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    vals.push(cur.trim());
+    var name = (vals[2] || '').replace(/^"|"$/g, '').trim();
+    if (!name || name === 'Account Executive') continue;
+    meta[name] = {
+      squad:   (vals[3] || '').replace(/^"|"$/g, '').trim(),
+      region:  (vals[4] || '').replace(/^"|"$/g, '').trim(),
+      country: (vals[5] || '').replace(/^"|"$/g, '').trim(),
+      segment: (vals[6] || '').replace(/^"|"$/g, '').trim(),
+    };
+  }
+  return meta;
+}
+
 async function loadData() {
   try {
     setLoaderProgress(10, 'Descargando scores de calls...');
@@ -1592,6 +1620,11 @@ async function loadData() {
     setLoaderProgress(50, 'Descargando diagnósticos...');
 
     var diagRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=0');
+    setLoaderProgress(70, 'Cargando datos de equipos...');
+    var metaRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=1454201149');
+    if (!metaRes.ok) throw new Error('No se pudo acceder al Sheet de AEsObjectives');
+    var metaCSV = await metaRes.text();
+    AE_META = parseCSVtoMeta(metaCSV);
     if (!diagRes.ok) throw new Error('No se pudo acceder al Sheet de Diagnósticos');
     var diagCSV = await diagRes.text();
     RAW_DIAG = parseCSVtoDiag(diagCSV);
