@@ -1649,31 +1649,26 @@ function parseCSVtoDiag(csv) {
 async function loadData() {
   try {
     setLoaderProgress(10, 'Descargando scores de calls...');
-
     var scoresRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=2036219614');
     if (!scoresRes.ok) throw new Error('No se pudo acceder al Sheet de Scores');
-    var scoresCSV = await scoresRes.text();
-    RAW_SCORES = parseCSVtoScores(scoresCSV);
-    setLoaderProgress(50, 'Descargando diagnósticos...');
+    RAW_SCORES = parseCSVtoScores(await scoresRes.text());
 
+    setLoaderProgress(40, 'Descargando diagnósticos...');
     var diagRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=0');
+    if (!diagRes.ok) throw new Error('No se pudo acceder al Sheet de Diagnósticos');
+    RAW_DIAG = parseCSVtoDiag(await diagRes.text());
+
     setLoaderProgress(70, 'Cargando datos de equipos...');
     var metaRes = await fetch('https://docs.google.com/spreadsheets/d/16rYCduvoNNxBjJWf0chYl7lC5hUnS6sPDgAKH5w9Oq4/export?format=csv&gid=1454201149');
     if (!metaRes.ok) throw new Error('No se pudo acceder al Sheet de AEsObjectives');
-    var metaCSV = await metaRes.text();
-    AE_META = parseCSVtoMeta(metaCSV);
-    if (!diagRes.ok) throw new Error('No se pudo acceder al Sheet de Diagnósticos');
-    var diagCSV = await diagRes.text();
-    RAW_DIAG = parseCSVtoDiag(diagCSV);
-    setLoaderProgress(90, 'Renderizando dashboard...');
+    AE_META = parseCSVtoMeta(await metaRes.text());
 
-    // Hide loader
+    setLoaderProgress(90, 'Renderizando dashboard...');
     setTimeout(function() {
       var loader = document.getElementById('loader');
       if (loader) loader.style.display = 'none';
     }, 300);
 
-    // Compute AE_SUMMARY from loaded scores
     var dims2 = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
     var aeMap2 = {};
     RAW_SCORES.forEach(function(s) {
@@ -1692,13 +1687,9 @@ async function loadData() {
     populateSelects();
     renderAll();
 
-    // Update last-refresh label if exists
-    var ts = document.getElementById('last-refresh');
-    if (ts) ts.textContent = 'Actualizado: ' + new Date().toLocaleString('es-AR');
-
   } catch(err) {
     var loader = document.getElementById('loader');
-    if (loader) loader.innerHTML = '<div style="color:#ff4757;font-size:16px;text-align:center;padding:40px;">⚠️ Error al cargar datos<br><br><span style="font-size:12px;color:#8b92a8;">' + err.message + '<br><br>Asegurate de abrir este archivo desde un servidor web,<br>no directamente desde tu computadora (file://).<br><br>Subilo a Google Sites o GitHub Pages.</span><br><br><button onclick="loadData()" style="margin-top:20px;padding:10px 20px;background:#4f7cff;color:white;border:none;border-radius:6px;cursor:pointer;">Reintentar</button></div>';
+    if (loader) loader.innerHTML = '<div style="color:#ff4757;font-size:16px;text-align:center;padding:40px;">⚠️ Error al cargar datos<br><br><span style="font-size:12px;color:#8b92a8;">' + err.message + '</span><br><br><button onclick="loadData()" style="margin-top:20px;padding:10px 20px;background:#4f7cff;color:white;border:none;border-radius:6px;cursor:pointer;">Reintentar</button></div>';
   }
 }
 
