@@ -33,7 +33,6 @@
     min-height: 100vh;
   }
 
-  /* HEADER */
   .header {
     display: flex;
     align-items: center;
@@ -90,7 +89,6 @@
     color: white;
   }
 
-  /* TABS */
   .tabs {
     display: flex;
     gap: 4px;
@@ -120,19 +118,16 @@
     border-bottom-color: var(--surface);
   }
 
-  /* MAIN */
   .main { padding: 28px 32px; }
 
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
-  /* GRID */
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
 
-  /* CARDS */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -176,7 +171,6 @@
   .badge-green { background: rgba(6,214,160,0.15); color: var(--green); }
   .badge-yellow { background: rgba(255,209,102,0.15); color: var(--yellow); }
 
-  /* AE TABLE */
   .ae-table { width: 100%; border-collapse: collapse; }
   .ae-table th {
     text-align: left;
@@ -216,7 +210,6 @@
   .score-mid { background: rgba(255,209,102,0.15); color: var(--yellow); }
   .score-low { background: rgba(255,71,87,0.15); color: var(--red); }
 
-  /* SEMAPHORE */
   .semaphore {
     width: 10px; height: 10px;
     border-radius: 50%;
@@ -227,12 +220,10 @@
   .sem-yellow { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
   .sem-red { background: var(--red); box-shadow: 0 0 6px var(--red); }
 
-  /* CHART WRAPPER */
   .chart-wrap { position: relative; height: 240px; }
   .chart-wrap-lg { position: relative; height: 320px; }
   .chart-wrap-sm { position: relative; height: 180px; }
 
-  /* CATEGORY BARS */
   .cat-bar-row {
     display: flex;
     align-items: center;
@@ -273,7 +264,6 @@
     flex-shrink: 0;
   }
 
-  /* DIAGNOSIS LIST */
   .diag-item {
     padding: 10px 14px;
     background: var(--surface2);
@@ -292,47 +282,6 @@
     opacity: 0.7;
   }
 
-  /* RADAR CHART */
-  .radar-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
-    justify-content: center;
-  }
-
-  .radar-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text2);
-  }
-
-  .radar-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* SECTION TITLE */
-  .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-title span {
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text2);
-  }
-
-  /* FILTER ROW */
   .filter-row {
     display: flex;
     gap: 12px;
@@ -358,7 +307,6 @@
     outline: none;
   }
 
-  /* COMPETITOR TAG */
   .comp-tag {
     display: inline-block;
     padding: 4px 12px;
@@ -373,34 +321,14 @@
 
   .comp-tag:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* SCROLL */
   .scroll-table { overflow-x: auto; }
-
-  /* MINI SCORE GRID */
-  .score-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    margin-top: 8px;
-  }
-
-  .score-cell {
-    text-align: center;
-    padding: 6px 2px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    font-weight: 600;
-  }
 
   .verdict-strong { color: var(--green); font-size: 11px; }
   .verdict-good { color: var(--yellow); font-size: 11px; }
   .verdict-needs { color: var(--red); font-size: 11px; }
 
-  /* EMPTY STATE */
   .empty { color: var(--text2); font-size: 13px; padding: 20px; text-align: center; }
 
-  /* ALERT BOX */
   .alert-box {
     padding: 12px 16px;
     border-radius: 8px;
@@ -418,6 +346,44 @@
   .alert-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
   .alert-sub { font-size: 12px; color: var(--text2); }
 
+  /* Talk ratio bar */
+  .talk-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .talk-bar-name {
+    font-size: 12px;
+    color: var(--text2);
+    width: 120px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .talk-bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--surface2);
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+  .talk-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.6s ease;
+  }
+  .talk-bar-val {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text2);
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
   @media (max-width: 1100px) {
     .grid-4 { grid-template-columns: repeat(2, 1fr); }
     .grid-3 { grid-template-columns: repeat(2, 1fr); }
@@ -426,7 +392,6 @@
 </style>
 </head>
 <body>
-
 
 <div id="loader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0d1117;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
   <div style="font-size:32px;">📊</div>
@@ -447,13 +412,13 @@
     <button class="filter-btn active" onclick="setPeriod(30, this)">30 días</button>
     <button class="filter-btn" onclick="setPeriod(60, this)">60 días</button>
     <button class="filter-btn" onclick="setPeriod(0, this)">Todo</button>
-    <select id="squadFilter" onchange="applyFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;outline:none;">
+    <select id="squadFilter" onchange="applyFilters()">
       <option value="">Todos los Squads</option>
     </select>
-    <select id="regionFilter" onchange="applyFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;outline:none;">
+    <select id="regionFilter" onchange="applyFilters()">
       <option value="">Todas las Regiones</option>
     </select>
-    <select id="segmentFilter" onchange="applyFilters()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:inherit;font-size:13px;cursor:pointer;outline:none;">
+    <select id="segmentFilter" onchange="applyFilters()">
       <option value="">Todos los Segmentos</option>
     </select>
     <select id="aeFilter" onchange="applyFilters()">
@@ -463,19 +428,18 @@
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('overview')">📊 Overview</div>
-  <div class="tab" onclick="showTab('team')">👥 Equipo</div>
-  <div class="tab" onclick="showTab('areas')">🎯 Áreas de Mejora</div>
-  <div class="tab" onclick="showTab('calls')">📞 Calls</div>
-  <div class="tab" onclick="showTab('evolution')">📈 Evolución</div>
-  <div class="tab" onclick="showTab('convo')">🎙️ Conversación</div>
+  <div class="tab active" onclick="showTab('overview', event)">📊 Overview</div>
+  <div class="tab" onclick="showTab('team', event)">👥 Equipo</div>
+  <div class="tab" onclick="showTab('areas', event)">🎯 Áreas de Mejora</div>
+  <div class="tab" onclick="showTab('calls', event)">📞 Calls</div>
+  <div class="tab" onclick="showTab('evolution', event)">📈 Evolución</div>
+  <div class="tab" onclick="showTab('convo', event)">🎙️ Conversación</div>
 </div>
 
 <div class="main">
 
   <!-- TAB: OVERVIEW -->
   <div id="tab-overview" class="tab-content active">
-
     <div class="grid-4">
       <div class="card">
         <div class="card-title">Calls Analizadas</div>
@@ -499,7 +463,6 @@
       </div>
     </div>
 
-    <!-- ALERTS -->
     <div id="alerts-section" style="margin-bottom:24px;"></div>
 
     <div class="grid-2-1">
@@ -531,12 +494,10 @@
         <div id="semaphore-list"></div>
       </div>
     </div>
-
   </div>
 
   <!-- TAB: EQUIPO -->
   <div id="tab-team" class="tab-content">
-
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Radar de Equipo — Promedio por Dimensión</div>
@@ -593,12 +554,10 @@
         <canvas id="aeTrendChart"></canvas>
       </div>
     </div>
-
   </div>
 
   <!-- TAB: ÁREAS DE MEJORA -->
   <div id="tab-areas" class="tab-content">
-
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Frecuencia por Categoría</div>
@@ -634,7 +593,6 @@
       <div class="card-title">Competidores Mencionados</div>
       <div id="comp-list"></div>
     </div>
-
   </div>
 
   <!-- TAB: CALLS -->
@@ -684,8 +642,6 @@
     </div>
   </div>
 
-
-
   <!-- TAB: EVOLUCIÓN -->
   <div id="tab-evolution" class="tab-content">
     <div class="grid-4" style="margin-bottom:20px;">
@@ -725,14 +681,14 @@
     <div class="grid-4" style="margin-bottom:20px;">
       <div class="card"><div class="card-title">% Habla AE Promedio</div><div class="kpi-value" id="cv-ae-talk" style="font-size:34px;">--</div><div class="kpi-sub">ideal: 40-50%</div></div>
       <div class="card"><div class="card-title">Preguntas AE Promedio</div><div class="kpi-value" id="cv-ae-q" style="font-size:34px;">--</div><div class="kpi-sub">por call</div></div>
-      <div class="card"><div class="card-title">Monólogos AE Promedio</div><div class="kpi-value" id="cv-monologs" style="font-size:34px;color:var(--red)">--</div><div class="kpi-sub">bloques &gt;100 palabras</div></div>
-      <div class="card"><div class="card-title">Calls con datos</div><div class="kpi-value" id="cv-count" style="font-size:34px;">--</div><div class="kpi-sub">de 241 analizadas</div></div>
+      <div class="card"><div class="card-title">Monólogos AE Promedio</div><div class="kpi-value" id="cv-monologs" style="font-size:34px;color:var(--red)">--</div><div class="kpi-sub">bloques >100 palabras</div></div>
+      <div class="card"><div class="card-title">Calls con datos</div><div class="kpi-value" id="cv-count" style="font-size:34px;">--</div><div class="kpi-sub" id="cv-count-sub">de las analizadas</div></div>
     </div>
     <div class="grid-2" style="margin-bottom:20px;">
       <div class="card">
         <div class="card-title">% Habla AE por AE</div>
         <div class="chart-wrap-lg"><canvas id="cvTalkChart"></canvas></div>
-        <div style="font-size:10px;color:var(--text2);margin-top:6px;">Zona ideal: 40–50% — si el AE habla más del 60% la call es un monólogo</div>
+        <div style="font-size:10px;color:var(--text2);margin-top:8px;">Zona ideal: 40–50% — si el AE habla más del 60% la call es un monólogo</div>
       </div>
       <div class="card">
         <div class="card-title">Monólogos por AE</div>
@@ -767,9 +723,7 @@
 // ============================================================
 let RAW_SCORES = [];
 let AE_META = {};
-
 let RAW_DIAG = [];
-
 let AE_SUMMARY = [];
 
 // ============================================================
@@ -859,17 +813,21 @@ function populateSelects() {
   const squads = [...new Set(Object.values(AE_META).map(m => m.squad).filter(Boolean))].sort();
   const regions = [...new Set(Object.values(AE_META).map(m => m.region).filter(Boolean))].sort();
   const segments = [...new Set(Object.values(AE_META).map(m => m.segment).filter(Boolean))].sort();
+
   const squadEl = document.getElementById('squadFilter');
   if (squadEl) { while(squadEl.options.length>1) squadEl.remove(1); squads.forEach(s => squadEl.add(new Option(s,s))); }
   const regionEl = document.getElementById('regionFilter');
   if (regionEl) { while(regionEl.options.length>1) regionEl.remove(1); regions.forEach(r => regionEl.add(new Option(r,r))); }
   const segmentEl = document.getElementById('segmentFilter');
   if (segmentEl) { while(segmentEl.options.length>1) segmentEl.remove(1); segments.forEach(s => segmentEl.add(new Option(s,s))); }
+
   const aes = [...new Set(RAW_SCORES.map(s => s.ae).filter(Boolean))].sort();
 
-  ['aeFilter', 'aeRadarSelect', 'aeDiagFilter', 'callsAEFilter'].forEach(id => {
+  ['aeFilter', 'aeRadarSelect', 'aeDiagFilter', 'callsAEFilter', 'cv-ae-filter'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
+    // keep first option, remove rest
+    while (el.options.length > 1) el.remove(1);
     aes.forEach(ae => {
       const opt = document.createElement('option');
       opt.value = ae; opt.textContent = ae;
@@ -879,6 +837,7 @@ function populateSelects() {
 
   const aeTrendEl = document.getElementById('aeTrendSelect');
   if (aeTrendEl) {
+    while (aeTrendEl.options.length > 0) aeTrendEl.remove(0);
     aes.forEach(ae => {
       const opt = document.createElement('option');
       opt.value = ae; opt.textContent = ae;
@@ -888,6 +847,7 @@ function populateSelects() {
 
   const cats = [...new Set(RAW_DIAG.map(d => d.category).filter(Boolean))].sort();
   const catEl = document.getElementById('catFilter');
+  while (catEl.options.length > 1) catEl.remove(1);
   cats.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c; opt.textContent = c;
@@ -898,11 +858,11 @@ function populateSelects() {
 // ============================================================
 // TAB SWITCHING
 // ============================================================
-function showTab(name) {
+function showTab(name, evt) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
+  if (evt && evt.target) evt.target.classList.add('active');
   renderAll();
 }
 
@@ -940,7 +900,6 @@ function renderOverview() {
   const scores = filterByPeriodAndAE(RAW_SCORES);
   const diags = filterByPeriodAndAE(RAW_DIAG);
 
-  // KPIs
   document.getElementById('kpi-calls').textContent = scores.length;
   document.getElementById('kpi-calls-sub').textContent = periodDays ? `últimos ${periodDays} días` : 'histórico';
 
@@ -1073,8 +1032,6 @@ function renderOverview() {
 // ============================================================
 function renderTeam() {
   const scores = filterByPeriodAndAE(RAW_SCORES);
-
-  // Team radar
   const dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
   const dimLabels = ['Discovery','B.Impact','Product','Objeciones','Rapport','Next Steps','Closing'];
   const teamAvgs = dims.map(d => avg(scores.map(s => s[d]).filter(Boolean)));
@@ -1127,7 +1084,6 @@ function renderTeam() {
       <td><span class="semaphore ${semColor(r.avg)}"></span></td>
     </tr>`).join('');
 
-  // AE trend
   updateAETrend();
 }
 
@@ -1165,7 +1121,6 @@ function updateAETrend() {
   const el = document.getElementById('aeTrendSelect');
   const selected = [...el.selectedOptions].map(o => o.value);
   const aeList = selected.length ? selected : [...new Set(RAW_SCORES.map(s => s.ae))].slice(0, 5);
-
   const scores = filterByPeriodAndAE(RAW_SCORES);
   const palette = ['#4f7cff','#06d6a0','#ffd166','#ff6b6b','#a29bfe','#fd79a8','#74b9ff','#e17055'];
 
@@ -1215,7 +1170,6 @@ function updateAETrend() {
 function renderAreas() {
   const diags = filterByPeriodAndAE(RAW_DIAG);
 
-  // Cat chart
   const catCounts = {};
   diags.forEach(d => { if (d.category) catCounts[d.category] = (catCounts[d.category] || 0) + 1; });
   const sorted = Object.entries(catCounts).sort((a,b) => b[1]-a[1]);
@@ -1239,7 +1193,6 @@ function renderAreas() {
     }
   });
 
-  // AE heat chart
   const aes = [...new Set(diags.map(d => d.ae))].sort();
   const cats = Object.keys(catCounts).slice(0, 6);
   const aeHeatData = aes.map(ae => cats.map(cat => diags.filter(d => d.ae === ae && d.category === cat).length));
@@ -1360,7 +1313,6 @@ function chartOptions(title) {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      title: title ? { display: false } : undefined,
     },
     scales: {
       x: { ticks: { color: '#8b92a8', font: {size: 10} }, grid: { color: '#252a3a' } },
@@ -1373,13 +1325,14 @@ function destroyChart(id) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
-
-
 // ============================================================
-// EVOLUCIÓN
+// EVOLUCIÓN — FIX: usa filterByPeriodAndAE en lugar de RAW_SCORES directo
 // ============================================================
 function renderEvolution() {
-  if (!RAW_SCORES || !RAW_SCORES.length) return;
+  // Use filtered data for all evolution charts
+  const filteredScores = filterByPeriodAndAE(RAW_SCORES);
+  if (!filteredScores || !filteredScores.length) return;
+
   var dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
 
   function avgScore(arr) {
@@ -1387,13 +1340,12 @@ function renderEvolution() {
     return Math.round(arr.reduce(function(s,x){ return s + dims.reduce(function(a,d){ return a+(x[d]||0); },0)/7; },0)/arr.length*10)/10;
   }
 
-  // Group by week
+  // Group by week (from filtered data)
   var byWeek = {};
-  RAW_SCORES.forEach(function(s) {
+  filteredScores.forEach(function(s) {
     if (!s.date) return;
     var d = new Date(s.date);
     if (isNaN(d)) return;
-    // Get Monday of that week
     var day = d.getDay();
     var monday = new Date(d);
     monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
@@ -1427,14 +1379,29 @@ function renderEvolution() {
     }
   });
 
-  // KPIs
+  // KPIs — month comparison uses filteredScores for current, RAW_SCORES for last month base
   var now = new Date();
   var thisMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
   var lastMonth = new Date(now.getFullYear(), now.getMonth()-1, 1);
   var lastMonthStr = lastMonth.getFullYear() + '-' + String(lastMonth.getMonth()+1).padStart(2,'0');
 
-  var thisMonthScores = RAW_SCORES.filter(function(s){ return s.date && s.date.substring(0,7) === thisMonth; });
-  var lastMonthScores = RAW_SCORES.filter(function(s){ return s.date && s.date.substring(0,7) === lastMonthStr; });
+  // Apply squad/region/segment filter to both months
+  var thisMonthScores = filteredScores.filter(function(s){ return s.date && s.date.substring(0,7) === thisMonth; });
+  // For last month we still filter by squad/region/segment but ignore period filter (it's comparison)
+  var squad = document.getElementById('squadFilter') ? document.getElementById('squadFilter').value : '';
+  var region = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
+  var segment = document.getElementById('segmentFilter') ? document.getElementById('segmentFilter').value : '';
+  var lastMonthScores = RAW_SCORES.filter(function(s){
+    if (!s.date || s.date.substring(0,7) !== lastMonthStr) return false;
+    if (selectedAE && s.ae !== selectedAE) return false;
+    if (squad || region || segment) {
+      var meta = getMetaForAE(s.ae);
+      if (squad && meta.squad !== squad) return false;
+      if (region && meta.region !== region) return false;
+      if (segment && meta.segment !== segment) return false;
+    }
+    return true;
+  });
 
   document.getElementById('ev-calls-month').textContent = thisMonthScores.length;
   document.getElementById('ev-calls-month-sub').textContent = 'vs ' + lastMonthScores.length + ' el mes anterior';
@@ -1457,9 +1424,9 @@ function renderEvolution() {
   document.getElementById('ev-top-ae').textContent = topAE ? topAE.split(' ').slice(0,2).join(' ') : '--';
   document.getElementById('ev-top-ae-sub').textContent = topAE ? avgScore(byAEMonth[topAE]) + '/10' : '';
 
-  // AE evolution chart - top 5 AEs by call count
+  // AE evolution chart — top 5 by call count within filtered set
   var byAE = {};
-  RAW_SCORES.forEach(function(s){ if (!byAE[s.ae]) byAE[s.ae]=[]; byAE[s.ae].push(s); });
+  filteredScores.forEach(function(s){ if (!byAE[s.ae]) byAE[s.ae]=[]; byAE[s.ae].push(s); });
   var top5 = Object.keys(byAE).sort(function(a,b){ return byAE[b].length-byAE[a].length; }).slice(0,5);
   var colors = ['#4f7cff','#06d6a0','#ffd166','#ff4757','#a29bfe'];
   var last8 = weeks.slice(-8);
@@ -1514,10 +1481,145 @@ function renderEvolution() {
 }
 
 // ============================================================
+// CONVERSACIÓN — función faltante, ahora implementada
+// ============================================================
+function renderConvo() {
+  // Only rows that actually have conversation data (pct_ae_talk > 0)
+  const allFiltered = filterByPeriodAndAE(RAW_SCORES);
+  const scores = allFiltered.filter(s => s.pct_ae_talk > 0);
+
+  // Update KPIs
+  const cvCount = document.getElementById('cv-count');
+  const cvCountSub = document.getElementById('cv-count-sub');
+  cvCount.textContent = scores.length || '--';
+  if (cvCountSub) cvCountSub.textContent = `de ${allFiltered.length} analizadas`;
+
+  if (!scores.length) {
+    document.getElementById('cv-ae-talk').textContent = '--';
+    document.getElementById('cv-ae-q').textContent = '--';
+    document.getElementById('cv-monologs').textContent = '--';
+    destroyChart('cvTalkChart');
+    destroyChart('cvMonoChart');
+    document.getElementById('cvTableBody').innerHTML = '<tr><td colspan="9" class="empty">No hay calls con datos de conversación en este período</td></tr>';
+    return;
+  }
+
+  const avgTalk = Math.round(avg(scores.map(s => s.pct_ae_talk)));
+  const avgQ = Math.round(avg(scores.map(s => s.ae_questions)) * 10) / 10;
+  const avgMono = Math.round(avg(scores.map(s => s.ae_monologues)) * 10) / 10;
+
+  document.getElementById('cv-ae-talk').textContent = avgTalk + '%';
+  document.getElementById('cv-ae-talk').style.color = avgTalk > 60 ? 'var(--red)' : avgTalk >= 40 ? 'var(--green)' : 'var(--yellow)';
+  document.getElementById('cv-ae-q').textContent = avgQ;
+  document.getElementById('cv-monologs').textContent = avgMono;
+
+  // Group by AE
+  const byAE = {};
+  scores.forEach(s => {
+    if (!byAE[s.ae]) byAE[s.ae] = [];
+    byAE[s.ae].push(s);
+  });
+
+  const aeList = Object.keys(byAE).sort();
+  const aeTalks = aeList.map(ae => Math.round(avg(byAE[ae].map(s => s.pct_ae_talk))));
+  const aeMono = aeList.map(ae => Math.round(avg(byAE[ae].map(s => s.ae_monologues)) * 10) / 10);
+
+  // % Talk chart — horizontal bar with color coding
+  destroyChart('cvTalkChart');
+  charts['cvTalkChart'] = new Chart(document.getElementById('cvTalkChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: aeList.map(a => a.split(' ')[0]),
+      datasets: [{
+        label: '% Habla AE',
+        data: aeTalks,
+        backgroundColor: aeTalks.map(v => v > 60 ? '#ff4757' : v >= 40 ? '#06d6a0' : '#ffd166'),
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        annotation: {}
+      },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          ticks: { color: '#8b92a8', font: {size:10}, callback: v => v + '%' },
+          grid: { color: '#252a3a' }
+        },
+        y: { ticks: { color: '#8b92a8', font: {size:11} }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  // Monologues chart
+  destroyChart('cvMonoChart');
+  charts['cvMonoChart'] = new Chart(document.getElementById('cvMonoChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: aeList.map(a => a.split(' ')[0]),
+      datasets: [{
+        label: 'Monólogos promedio',
+        data: aeMono,
+        backgroundColor: aeMono.map(v => v >= 3 ? '#ff4757' : v >= 1.5 ? '#ffd166' : '#06d6a0'),
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8b92a8', font: {size:10} }, grid: { color: '#252a3a' } },
+        y: { ticks: { color: '#8b92a8', font: {size:11} }, grid: { color: '#252a3a' } }
+      }
+    }
+  });
+
+  filterCvTable();
+}
+
+function filterCvTable() {
+  const aeFilter = document.getElementById('cv-ae-filter').value;
+  const allFiltered = filterByPeriodAndAE(RAW_SCORES);
+  let rows = allFiltered.filter(s => s.pct_ae_talk > 0);
+  if (aeFilter) rows = rows.filter(s => s.ae === aeFilter);
+
+  const label = document.getElementById('cv-count-label');
+  if (label) label.textContent = rows.length + ' calls con datos';
+
+  const dims = ['discovery','business_impact','product','objections','rapport','next_steps','closing'];
+  const tbody = document.getElementById('cvTableBody');
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">No hay datos para este filtro</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.sort((a,b) => b.date.localeCompare(a.date)).map(s => {
+    const sc = avg(dims.map(d => s[d]));
+    const talkColor = s.pct_ae_talk > 60 ? 'var(--red)' : s.pct_ae_talk >= 40 ? 'var(--green)' : 'var(--yellow)';
+    const monoColor = s.ae_monologues >= 3 ? 'var(--red)' : s.ae_monologues >= 1.5 ? 'var(--yellow)' : 'var(--green)';
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)">${s.date}</td>
+      <td class="ae-name">${s.ae}</td>
+      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.meeting}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;color:${talkColor}">${s.pct_ae_talk}%</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--text2)">${s.pct_client_talk > 0 ? s.pct_client_talk + '%' : '—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--accent)">${s.ae_questions}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--text2)">${s.client_questions > 0 ? s.client_questions : '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:600;color:${monoColor}">${s.ae_monologues}</td>
+      <td><span class="score-pill ${scoreClass(sc)}">${fmt(sc)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
 // INIT
 // ============================================================
-
-// ─── LIVE DATA FETCH ────────────────────────────────────────
 function setLoaderProgress(pct, msg) {
   var bar = document.getElementById('loader-bar');
   var sub = document.getElementById('loader-sub');
@@ -1545,7 +1647,6 @@ function parseCSVtoScores(csv) {
     for (var j = 0; j < headers.length; j++) {
       obj[headers[j]] = vals[j] !== undefined ? vals[j].replace(/^"|"$/g,'') : '';
     }
-    // Fix date: "02/19/26 5:18 PM" -> "2026-02-19"
     var rawDate = obj['Date'] || obj['date'] || '';
     var parsedDate = '';
     if (rawDate.match(/^\d{2}\/\d{2}\/\d{2}/)) {
@@ -1562,11 +1663,11 @@ function parseCSVtoScores(csv) {
       buying_intent: obj['Buying Intent'] || obj['Buying intent'] || obj['buying_intent'] || 'Medium',
       competitors: obj['Competitors'] || obj['competitors'] || 'None',
       verdict: obj['Final Verdict'] || obj['Final verdict'] || obj['verdict'] || '',
-      pct_ae_talk: parseFloat(obj['% Habla AE'] || 0) || 0,
-      pct_client_talk: parseFloat(obj['% Habla Cliente'] || 0) || 0,
+      pct_ae_talk: parseFloat(obj['% Habla AE'] || obj['Pct Habla AE'] || 0) || 0,
+      pct_client_talk: parseFloat(obj['% Habla Cliente'] || obj['Pct Habla Cliente'] || 0) || 0,
       ae_questions: parseInt(obj['Preguntas AE'] || 0) || 0,
       client_questions: parseInt(obj['Preguntas Cliente'] || 0) || 0,
-      ae_monologues: parseInt(obj['Monólogos AE'] || obj['Monolagos AE'] || 0) || 0,
+      ae_monologues: parseInt(obj['Monólogos AE'] || obj['Monologos AE'] || obj['Monolagos AE'] || 0) || 0,
       discovery: parseFloat(obj['Discovery'] || obj['discovery'] || 0) || 0,
       business_impact: parseFloat(obj['Business Impact'] || obj['business_impact'] || 0) || 0,
       product: parseFloat(obj['Product'] || obj['product'] || 0) || 0,
@@ -1619,8 +1720,7 @@ function parseCSVtoDiag(csv) {
   return rows;
 }
 
-
-  function parseCSVtoMeta(csv) {
+function parseCSVtoMeta(csv) {
   var lines = csv.trim().split('\n');
   var meta = {};
   for (var i = 1; i < lines.length; i++) {
@@ -1678,8 +1778,8 @@ async function loadData() {
     });
     AE_SUMMARY = Object.keys(aeMap2).map(function(ae) {
       var sl = aeMap2[ae];
-      var avg = sl.reduce(function(sum,s){ return sum + dims2.reduce(function(a,d){ return a+(s[d]||0); },0)/7; }, 0) / sl.length;
-      var entry = { ae: ae, calls: sl.length, avg_score: Math.round(avg*100)/100, won: 0, lost: 0, active: 0, win_rate: 0, won_value: 0 };
+      var a = sl.reduce(function(sum,s){ return sum + dims2.reduce(function(a,d){ return a+(s[d]||0); },0)/7; }, 0) / sl.length;
+      var entry = { ae: ae, calls: sl.length, avg_score: Math.round(a*100)/100, won: 0, lost: 0, active: 0, win_rate: 0, won_value: 0 };
       dims2.forEach(function(d) { entry[d] = Math.round(sl.reduce(function(a,s){ return a+(s[d]||0); },0)/sl.length*10)/10; });
       return entry;
     });
@@ -1694,7 +1794,6 @@ async function loadData() {
 }
 
 loadData();
-
 </script>
 </body>
 </html>
