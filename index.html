@@ -1627,6 +1627,23 @@ function setLoaderProgress(pct, msg) {
   if (sub && msg) sub.textContent = msg;
 }
 
+
+// Fuzzy header lookup — handles encoding issues with %, o, accents from Google Sheets CSV export
+function objFuzzy(obj, keys) {
+  for (var i = 0; i < keys.length; i++) {
+    if (obj[keys[i]] !== undefined && obj[keys[i]] !== "") return obj[keys[i]];
+  }
+  var objKeys = Object.keys(obj);
+  for (var i = 0; i < keys.length; i++) {
+    var needle = keys[i].toLowerCase().replace(/[^a-z0-9]/g, "");
+    for (var j = 0; j < objKeys.length; j++) {
+      var hay = objKeys[j].toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (hay === needle && obj[objKeys[j]] !== "") return obj[objKeys[j]];
+    }
+  }
+  return "";
+}
+
 function parseCSVtoScores(csv) {
   var lines = csv.trim().split('\n');
   var headers = lines[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
@@ -1663,11 +1680,11 @@ function parseCSVtoScores(csv) {
       buying_intent: obj['Buying Intent'] || obj['Buying intent'] || obj['buying_intent'] || 'Medium',
       competitors: obj['Competitors'] || obj['competitors'] || 'None',
       verdict: obj['Final Verdict'] || obj['Final verdict'] || obj['verdict'] || '',
-      pct_ae_talk: parseFloat(obj['% Habla AE'] || obj['Pct Habla AE'] || 0) || 0,
-      pct_client_talk: parseFloat(obj['% Habla Cliente'] || obj['Pct Habla Cliente'] || 0) || 0,
-      ae_questions: parseInt(obj['Preguntas AE'] || 0) || 0,
-      client_questions: parseInt(obj['Preguntas Cliente'] || 0) || 0,
-      ae_monologues: parseInt(obj['Monólogos AE'] || obj['Monologos AE'] || obj['Monolagos AE'] || 0) || 0,
+      pct_ae_talk: parseFloat(objFuzzy(obj, ['% Habla AE','% habla AE','Pct Habla AE','%HablaAE','% Habla Ae']) || 0) || 0,
+      pct_client_talk: parseFloat(objFuzzy(obj, ['% Habla Cliente','% habla Cliente','Pct Habla Cliente']) || 0) || 0,
+      ae_questions: parseInt(objFuzzy(obj, ['Preguntas AE','preguntas AE','Preguntas Ae']) || 0) || 0,
+      client_questions: parseInt(objFuzzy(obj, ['Preguntas Cliente','preguntas Cliente']) || 0) || 0,
+      ae_monologues: parseInt(objFuzzy(obj, ['Monólogos AE','Monologos AE','Monolagos AE','Mon\u00f3logos AE','Mon\u00f3logos Ae']) || 0) || 0,
       discovery: parseFloat(obj['Discovery'] || obj['discovery'] || 0) || 0,
       business_impact: parseFloat(obj['Business Impact'] || obj['business_impact'] || 0) || 0,
       product: parseFloat(obj['Product'] || obj['product'] || 0) || 0,
